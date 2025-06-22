@@ -1,0 +1,10 @@
+[
+  {
+    "name": "TraderBob",
+    "x": 1000,
+    "y": 800,
+    "patrolStartX": 900,
+    "patrolEndX": 1100,
+    "texture": "assets/NPC/GraveRobber.png"
+  }
+]
