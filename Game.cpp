@@ -91,8 +91,8 @@ SDL_AppResult Game::SDL_AppInit()
     SDL_CreateWindowAndRenderer("SDL3 Game", 1920, 1080, SDL_WINDOW_RESIZABLE, &window, &renderer);
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
-    font = TTF_OpenFont("assets/fonts/Orbitron-VariableFont_wght.ttf", 32);
-    camera = new Camera(2560.0f, 1440.0f);
+    font = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
+    camera = new Camera(1920.0f, 1080.0f);
 
 
     player = new Player(renderer, font, camera);
@@ -108,20 +108,7 @@ SDL_AppResult Game::SDL_AppInit()
  // Создаем врагов
     enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Default));
     enemies.push_back(new Enemy(renderer, 850.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1000.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1200.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1500.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1250.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2000.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1700.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 1800.0f, 275.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2000.0f, 350.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2100.0f, 400.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2200.0f, 300.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2300.0f, 300.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 2900.0f, 200.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 5000.0f, 200.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 6000.0f, 200.0f, EnemyType::Default));
+  
 
 
     // Game::SDL_AppInit()
@@ -133,7 +120,8 @@ SDL_AppResult Game::SDL_AppInit()
     float playerY = player->getDest().y;
     npcs.push_back(new NPC(renderer, 475.0f, 1377.f));
 
-
+    startMenu = new StartMenu(renderer, font, window);
+    
 
 
     for (Enemy* enemy : enemies) {
@@ -173,6 +161,18 @@ SDL_AppResult Game::SDL_AppInit()
 
 SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
 {
+    if (showStartMenu) {
+        bool startGame = false, showSettings = false, quit = false;
+        startMenu->handleEvent(*event, startGame, showSettings, quit);
+        if (startGame) {
+            showStartMenu = false;
+            // Запускаем игру
+        }
+        if (quit) {
+            // Завершаем приложение
+        }
+    }
+
     if (event->type == SDL_EVENT_QUIT)
         return SDL_APP_SUCCESS;
 
@@ -205,6 +205,11 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
 
 SDL_AppResult Game::SDL_AppIterate()
 {
+    if (showStartMenu) {
+        startMenu->render();
+        return SDL_APP_CONTINUE;
+    }
+
     static Uint64 lastTime = SDL_GetTicks();
     Uint64 currentTime = SDL_GetTicks();
     float deltaTime = (currentTime - lastTime) / 1000.0f;
@@ -219,6 +224,7 @@ SDL_AppResult Game::SDL_AppIterate()
     tileMap->renderLayer(renderer, camera, "Tile Layer 4");
     tileMap->renderLayer(renderer, camera, "Tile Layer 5");
     tileMap->renderLayer(renderer, camera, "Tile Layer 6");
+    tileMap->renderLayer(renderer, camera, "Tile Layer 7");
 
     if (player->isDead()) {
         SDL_Color red = { 255, 0, 0, 255 };
@@ -345,7 +351,29 @@ SDL_AppResult Game::SDL_AppIterate()
                 ++it;
             }
         }
+        for (const auto& label : tileMap->getLabels()) {
+            SDL_FRect screenBox = camera->apply(label.rect);
+            SDL_Color color = { 255, 255, 255, 255 };
+            SDL_Surface* surface = TTF_RenderText_Solid(font, label.text.c_str(), label.text.length(), color);
 
+
+            if (surface) {
+                SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+                SDL_DestroySurface(surface);
+
+                float w = 0, h = 0;
+                SDL_GetTextureSize(texture, &w, &h);
+
+                SDL_FRect dst = {
+                    screenBox.x + (screenBox.w - w) / 2.0f,
+                    screenBox.y + (screenBox.h - h) / 2.0f,
+                    (float)w, (float)h
+                };
+
+                SDL_RenderTexture(renderer, texture, nullptr, &dst);
+                SDL_DestroyTexture(texture);
+            }
+        }
         player->renderInventory();
         renderFloatingTexts(renderer, font, camera);
     }

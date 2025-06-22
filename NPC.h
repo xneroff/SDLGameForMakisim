@@ -21,7 +21,7 @@ public:
     std::vector<std::string> dialogPhrases = {
     "Privet, putnik!",
     "be safe in thats places.",
-    "Talk, in forest can live monsters...",
+    "",
     "Have a good luck!"
     };
     int currentPhrase = 0;

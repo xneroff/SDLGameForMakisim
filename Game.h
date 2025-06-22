@@ -8,7 +8,7 @@
 #include "TileMap.h"
 #include "Enemy.h"   // заменили Dummy на Enemy
 #include "TileMap.h"
-
+#include "StartMenu.h"
 struct FloatingText {
     std::string text;
     SDL_FPoint position;
@@ -34,6 +34,9 @@ public:
     void SDL_AppQuit(SDL_AppResult result);
 
 private:
+
+    StartMenu* startMenu = nullptr;
+
     bool showMenu = false;
     bool quit = false;
     bool started = false; // Игра еще не начата — показываем главное меню

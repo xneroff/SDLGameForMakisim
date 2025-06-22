@@ -50,22 +50,40 @@ bool TileMap::loadFromFile(const std::string& path) {
 void TileMap::renderLayer(SDL_Renderer* renderer, Camera* camera, const std::string& name) {
     for (const auto& layer : layers) {
         if (layer.name != name) continue;
-        for (int y = 0; y < mapHeight; ++y) {
-            for (int x = 0; x < mapWidth; ++x) {
+
+        // Получаем видимую область камеры в тайлах
+        SDL_FRect view = camera->getView();
+        float camX = view.x;
+        float camY = view.y;
+        float camW = view.w;
+        float camH = view.h;
+
+
+        int startX = std::max(0, int(camX / tileWidth));
+        int startY = std::max(0, int(camY / tileHeight));
+        int endX = std::min(mapWidth, int((camX + camW) / tileWidth) + 2); // +2 для плавности по краям
+        int endY = std::min(mapHeight, int((camY + camH) / tileHeight) + 2);
+
+        for (int y = startY; y < endY; ++y) {
+            for (int x = startX; x < endX; ++x) {
                 int tileID = layer.data[y * mapWidth + x];
                 if (tileID == 0) continue;
 
+                // Оптимизированный поиск tileset (проходим в обратном порядке)
                 const Tileset* ts = nullptr;
-                for (const auto& tileset : tilesets)
-                    if (tileID >= tileset.firstgid) ts = &tileset;
-
+                for (auto it = tilesets.rbegin(); it != tilesets.rend(); ++it) {
+                    if (tileID >= it->firstgid) {
+                        ts = &(*it);
+                        break;
+                    }
+                }
                 if (!ts || !ts->texture) continue;
 
                 SDL_FRect src = {
-    float((tileID - ts->firstgid) % ts->columns * tileWidth),
-    float((tileID - ts->firstgid) / ts->columns * tileHeight),
-    float(tileWidth),
-    float(tileHeight)
+                    float((tileID - ts->firstgid) % ts->columns * tileWidth),
+                    float((tileID - ts->firstgid) / ts->columns * tileHeight),
+                    float(tileWidth),
+                    float(tileHeight)
                 };
 
                 SDL_FRect worldDest = {
@@ -82,6 +100,7 @@ void TileMap::renderLayer(SDL_Renderer* renderer, Camera* camera, const std::str
         }
     }
 }
+
 
 
 
@@ -183,6 +202,22 @@ void TileMap::loadCollisions(const json& layersJson) {
 
                     chests.push_back(chest);
                     std::cout << "Loaded chest: " << chest.name << " with item: " << chest.item << " x" << chest.amount << std::endl;
+                }
+            }
+            else if (layerName == "Nadpisi") {
+                for (const auto& obj : layer["objects"]) {
+                    if (obj.contains("text")) {
+                        MapLabel label;
+                        label.rect = {
+                            static_cast<float>(obj["x"]),
+                            static_cast<float>(obj["y"]),
+                            static_cast<float>(obj["width"]),
+                            static_cast<float>(obj["height"])
+                        };
+                        label.text = obj["text"]["text"];
+                        labels.push_back(label);
+                        std::cout << "Loaded map label: " << label.text << std::endl;
+                    }
                 }
             }
         }

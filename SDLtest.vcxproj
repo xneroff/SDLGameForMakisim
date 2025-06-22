@@ -158,6 +158,7 @@
     <ClCompile Include="PlayerMoneyHUD.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillHUD.cpp" />
+    <ClCompile Include="StartMenu.cpp" />
     <ClCompile Include="SunBeamSkill.cpp" />
     <ClCompile Include="TileMap.cpp" />
   </ItemGroup>
@@ -180,6 +181,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Skill.h" />
     <ClInclude Include="SkillHUD.h" />
+    <ClInclude Include="StartMenu.h" />
     <ClInclude Include="Structs.h" />
     <ClInclude Include="SunBeamSkill.h" />
     <ClInclude Include="TileMap.h" />

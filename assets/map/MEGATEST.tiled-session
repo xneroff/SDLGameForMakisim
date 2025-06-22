@@ -52,11 +52,11 @@
             "expandedObjectLayers": [
                 5
             ],
-            "scale": 1.5,
-            "selectedLayer": 6,
+            "scale": 0.75,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 505.3333333333333,
-                "y": 1329
+                "x": 8956,
+                "y": 1230
             }
         },
         "Map2.json": {
@@ -66,8 +66,8 @@
             "scale": 0.75,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 3746.6666666666665,
-                "y": 800.6666666666666
+                "x": 138,
+                "y": 1128.6666666666665
             }
         },
         "Medieval_props_free.tsx": {
@@ -174,23 +174,22 @@
             "scaleInEditor": 1
         }
     },
-    "last.exportedFilePath": "C:/Users/wein/source/repos/SDLtest/assets/map",
+    "last.exportedFilePath": "C:/Users/wein/source/repos/SDLtest-master/assets/map",
     "last.externalTilesetPath": "C:/Users/wein/source/repos/SDLtest/assets/map",
-    "last.imagePath": "C:/Users/wein/source/repos/SDLtest/assets/PNG files",
+    "last.imagePath": "C:/Users/wein/source/repos/SDLtest/assets/Demo",
     "lastUsedTilesetExportFilter": "Все файлы (*)",
     "map.height": 50,
     "map.lastUsedExportFilter": "JSON map-файлы (*.tmj *.json)",
-    "map.lastUsedFormat": "json",
+    "map.lastUsedFormat": "tmx",
     "map.width": 250,
     "openFiles": [
-        "MEGATEST.tmx",
-        "Map2.json"
+        "MEGATEST.tmx"
     ],
     "project": "MEGATEST.tiled-project",
-    "property.type": "bool",
+    "property.type": "string",
     "recentFiles": [
-        "Map2.json",
         "MEGATEST.tmx",
+        "Map2.json",
         "ParallaxCave4.tsx",
         "ParallaxCave3.tsx",
         "ParallaxCave2.tsx",

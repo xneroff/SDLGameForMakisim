@@ -11,7 +11,10 @@ struct Tileset {
     int tileWidth, tileHeight;
     SDL_Texture* texture;
 };
-
+struct MapLabel {
+    std::string text;
+    SDL_FRect rect;
+};
 struct MapLayer {
     std::string name;
     std::vector<int> data;
@@ -21,7 +24,7 @@ class TileMap {
 public:
     TileMap(SDL_Renderer* renderer);
     ~TileMap();
-
+    const std::vector<MapLabel>& getLabels() const { return labels; }
     bool loadFromFile(const std::string& path);
     void renderLayer(SDL_Renderer* renderer, Camera* camera, const std::string& name);
     SDL_FPoint getSpawnPoint() const;
@@ -36,6 +39,7 @@ public:
     int getTileHeight() const { return tileHeight; }
 
 private:
+    std::vector<MapLabel> labels;
 
     SDL_FPoint spawnPoint{ 0, 0 };
     std::vector<Chest> chests;
