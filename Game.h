@@ -50,8 +50,10 @@ private:
     TTF_Font* font;
     MainMenu* menu = nullptr;
     Camera* camera = nullptr;
-
+    const Uint32 restartDelay = 5000;
     TileMap* tileMap = nullptr;
+    bool gameOver = false;
+    Uint64 deathTime = 0;
 
     std::vector<Enemy*> enemies;  // вместо одного dummy — вектор врагов
 

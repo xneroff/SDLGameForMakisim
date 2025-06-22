@@ -118,7 +118,7 @@ SDL_AppResult Game::SDL_AppInit()
     //enemies.push_back(new Enemy(renderer, 1200.0f, 230.0f, EnemyType::Bird));
 
     float playerY = player->getDest().y;
-    npcs.push_back(new NPC(renderer, 475.0f, 1377.f));
+    npcs.push_back(new NPC(renderer, 400, 2977));
 
     startMenu = new StartMenu(renderer, font, window);
     
@@ -225,25 +225,39 @@ SDL_AppResult Game::SDL_AppIterate()
     tileMap->renderLayer(renderer, camera, "Tile Layer 5");
     tileMap->renderLayer(renderer, camera, "Tile Layer 6");
     tileMap->renderLayer(renderer, camera, "Tile Layer 7");
-
     if (player->isDead()) {
+        if (!gameOver) {
+            gameOver = true;
+            deathTime = SDL_GetTicks();
+        }
+
+        Uint32 elapsed = SDL_GetTicks() - deathTime;
+
         SDL_Color red = { 255, 0, 0, 255 };
         SDL_Surface* surface = TTF_RenderText_Blended(font, "GAME OVER", strlen("GAME OVER"), red);
-        if (!surface) return SDL_APP_CONTINUE;
+        if (surface) {
+            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+            SDL_DestroySurface(surface);
 
-        SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-        SDL_DestroySurface(surface);
-        if (!texture) return SDL_APP_CONTINUE;
+            float w, h;
+            SDL_GetTextureSize(texture, &w, &h);
+            SDL_FRect dst = { 1920 / 2.0f - w / 2.0f, 1080 / 2.0f - h / 2.0f, w, h };
+            SDL_RenderTexture(renderer, texture, nullptr, &dst);
+            SDL_DestroyTexture(texture);
+        }
 
-        float w, h;
-        SDL_GetTextureSize(texture, &w, &h);
-        SDL_FRect dst = { 1920 / 2.0f - w / 2.0f, 1080 / 2.0f - h / 2.0f, w, h };
-        SDL_RenderTexture(renderer, texture, nullptr, &dst);
-        SDL_DestroyTexture(texture);
         SDL_RenderPresent(renderer);
-        SDL_Delay(100);
+
+        if (elapsed >= restartDelay) {
+            // Перезапускаем игру:
+            SDL_AppQuit(SDL_APP_SUCCESS);  // очистим старое состояние                // пересоздаём объект игры
+            SDL_AppInit();                 // запускаем заново
+        }
+
+        SDL_Delay(16);
         return SDL_APP_CONTINUE;
     }
+
 
     if (showMenu) {
         menu->render();
@@ -311,14 +325,15 @@ SDL_AppResult Game::SDL_AppIterate()
             npc->render(renderer, camera);
 
             if (npc->showDialog) {
-                SDL_FRect dialogBox = { npc->getRect().x - 20, npc->getRect().y - 70, 180, 40 };
+                SDL_FRect dialogBox = { npc->getRect().x - 20, npc->getRect().y - 25, 200, 40 };
                 SDL_FRect screenBox = camera->apply(dialogBox);
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
                 SDL_RenderFillRect(renderer, &screenBox);
 
                 SDL_Color color = { 255, 255, 255, 255 };
                 std::string text = npc->dialogPhrases[npc->currentPhrase];
-                SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), text.length(), color);
+                TTF_Font* fontt = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 14);
+                SDL_Surface* surface = TTF_RenderText_Solid(fontt, text.c_str(), text.length(), color);
                 if (surface) {
                     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
                     SDL_FRect textRect = { screenBox.x + 10, screenBox.y + 10, (float)surface->w, (float)surface->h };

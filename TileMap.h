@@ -14,6 +14,7 @@ struct Tileset {
 struct MapLabel {
     std::string text;
     SDL_FRect rect;
+
 };
 struct MapLayer {
     std::string name;
