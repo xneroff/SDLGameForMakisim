@@ -30,7 +30,7 @@ void PlayerHealthHUD::setHealth(int newHealth) {
 
 
 void PlayerHealthHUD::update(float deltaTime) {
-    SDL_Log("update called: DisplayedHealth = %.2f, Health = %d", DisplayedHealth, Health);
+ 
 
     if (DisplayedHealth != Health) {
         float diff = Health - DisplayedHealth;

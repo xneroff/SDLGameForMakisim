@@ -9025,7 +9025,7 @@ class json_sax_dom_parser
         static_cast<void>(ex);
         if (allow_exceptions)
         {
-            JSON_THROW(ex);
+          JSON_THROW(ex);
         }
         return false;
     }

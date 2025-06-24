@@ -3,19 +3,20 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_keyboard.h>
-#include "DashSkill.h"
+#include "DashSkill.h"      
 #include "FireballSkill.h"
 #include "Enemy.h"
 #include <iostream>
 #include <fstream>
 #include "Game.h"
+#include "TileMap.h"
+#include "Player.h"
 
-
-Player::Player(SDL_Renderer* renderer, TTF_Font* font, Camera* camera)
-    : renderer(renderer), font(font), camera(camera),
+Player::Player(SDL_Renderer* renderer, TTF_Font* font, Camera* camera, Game* game)
+    : renderer(renderer), font(font), camera(camera), game(game),
     inventoryOpen(false), inventory(new Inventory(renderer)),
     dashIconTexture(nullptr), animationHandler(),
-    speed(4), currentHealth(100), TotalHealth(100),
+    speed(10), currentHealth(100), TotalHealth(100),
     money(0), flip(SDL_FLIP_NONE),
     oldX(0), velocityY(0), gravity(1.0f), sila_prizhka(-15.0f),
     currentLoop(true), isWalk(false), isAttack(false),
@@ -359,57 +360,71 @@ void Player::setPosition(float x, float y) {
         }
 
 
-        void Player::obnovleniepersa() {
-            static Uint64 lastTime = SDL_GetTicks();
+            void Player::obnovleniepersa() {
+                static Uint64 lastTime = SDL_GetTicks();
 
-            Uint64 now = SDL_GetTicks();
-            Uint64 deltaTimeMs = now - lastTime;
-            lastTime = now;
+                Uint64 now = SDL_GetTicks();
+                Uint64 deltaTimeMs = now - lastTime;
+                lastTime = now;
 
-            float deltaTime = deltaTimeMs / 1000.0f;
+                float deltaTime = deltaTimeMs / 1000.0f;
 
-            const bool* keys = SDL_GetKeyboardState(nullptr);
+                const bool* keys = SDL_GetKeyboardState(nullptr);
 
-            // Всегда вызываем движение
-            moveHandler(keys);
+                // Всегда вызываем движение
+                moveHandler(keys);
 
-            interface->obnovlenieHUD(deltaTime);
-
-
-            const AnimationSet& currentAnimation = animations[currentAnim];
-
-            // loop=false для анимации атаки, чтобы она дошла до конца
-            bool loopAnim = (currentAnim != "attack");
-
-            animationHandler.update(currentAnimation, src, 48 /* ширина кадра для ваших спрайтов */, loopAnim);
+                interface->obnovlenieHUD(deltaTime);
 
 
-            attackHandler();
+                const AnimationSet& currentAnimation = animations[currentAnim];
 
-            for (Skill* skill : skills) {
-                skill->update(this, deltaTime); // FireballSkill использует checkCollisionForRect(player)
-            }
-            rect = dest;  // чтобы getRect() возвращал актуальные координаты
+                // loop=false для анимации атаки, чтобы она дошла до конца
+                bool loopAnim = (currentAnim != "attack");
 
-            Uint64 nowMs = SDL_GetTicks();
+                animationHandler.update(currentAnimation, src, 48 /* ширина кадра для ваших спрайтов */, loopAnim);
 
-            // Если прошло 7 секунд без урона — разрешить регенерацию
-            if (!canRegen && nowMs - lastDamageTime >= 7000) {
-                canRegen = true;
-                lastHealTick = nowMs; // сбрасываем таймер лечения
-            }
 
-            // Если регенерация включена и прошло 5 секунд с прошлого восстановления
-            if (canRegen && nowMs - lastHealTick >= 5000) {
-                if (currentHealth < TotalHealth) {
-                    currentHealth += 5;
-                    if (currentHealth > TotalHealth) currentHealth = TotalHealth;
-                    interface->setHealth(currentHealth);
+                attackHandler();
+
+                for (Skill* skill : skills) {
+                    skill->update(this, deltaTime); // FireballSkill использует checkCollisionForRect(player)
                 }
-                lastHealTick = nowMs; // обновляем таймер
-            }
+                rect = dest;  // чтобы getRect() возвращал актуальные координаты
 
-        }
+                Uint64 nowMs = SDL_GetTicks();
+
+                // Если прошло 7 секунд без урона — разрешить регенерацию
+                if (!canRegen && nowMs - lastDamageTime >= 7000) {
+                    canRegen = true;
+                    lastHealTick = nowMs; // сбрасываем таймер лечения
+                }
+
+                // Если регенерация включена и прошло 5 секунд с прошлого восстановления
+                if (canRegen && nowMs - lastHealTick >= 5000) {
+                    if (currentHealth < TotalHealth) {
+                        currentHealth += 5;
+                        if (currentHealth > TotalHealth) currentHealth = TotalHealth;
+                        interface->setHealth(currentHealth);
+                    }
+                    lastHealTick = nowMs; // обновляем таймер   
+                }
+                // сохраняем последний портал, в который зашёл игрок
+                game->lastPortalInRange = nullptr;
+                for (const Portal& p : game->getTileMap()->getPortals()) {
+                    SDL_FRect playerBox = getRect();
+                    if (SDL_HasRectIntersectionFloat(&playerBox, &p.rect)) {
+                        game->lastPortalInRange = &p;
+                        break;
+                    }
+                }
+
+
+
+
+                std::cout << "Player position: x=" << dest.x << " y=" << dest.y << std::endl;
+
+            }
 
         void Player::takeDamage(int amount) {
             if (currentHealth <= 0) return;

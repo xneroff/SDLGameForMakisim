@@ -9,8 +9,17 @@
 #include <ctime>
 #include <iostream>
 #include "NPC.h"
+#include "Player.h"
 
 std::vector<NPC*> npcs;
+void Game::startTeleport(const std::string& map, const std::string& spawn) {
+    isTeleporting = true;
+    shouldLoadNextMap = false;
+    teleportTimer = 3.0f;
+
+    teleportTargetMap = map;
+    teleportTargetSpawn = spawn;
+}
 
 bool checkCollision(const SDL_FRect& a, const SDL_FRect& b) {
     return a.x < b.x + b.w && a.x + a.w > b.x &&
@@ -95,7 +104,8 @@ SDL_AppResult Game::SDL_AppInit()
     camera = new Camera(1920.0f, 1080.0f);
 
 
-    player = new Player(renderer, font, camera);
+    player = new Player(renderer, font, camera, this);
+
     SDL_FRect playerRect = player->getRect();
 
     tileMap = new TileMap(renderer);
@@ -118,27 +128,39 @@ SDL_AppResult Game::SDL_AppInit()
     //enemies.push_back(new Enemy(renderer, 1200.0f, 230.0f, EnemyType::Bird));
 
     float playerY = player->getDest().y;
-    npcs.push_back(new NPC(renderer, 400, 2977));
+    SDL_FPoint npc1Pos = tileMap->getNPCSpawn("NPCSpawn1");
+
+
+    SDL_FPoint pos1 = tileMap->getNPCSpawn("NPCSpawn1");
+    std::vector<std::string> phrases1 = {
+        "Привет, герой!",
+        "Береги себя в этих землях.",
+        "Я когда-то был искателем приключений...",
+        "Удачи!"
+    };
+    npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, phrases1));
+
+    SDL_FPoint pos2 = tileMap->getNPCSpawn("NPCSpawn2");
+    std::vector<std::string> phrases2 = {
+        "Здесь обитает древнее зло.",
+        "Ты храбр, раз пришёл сюда.",
+        "Возьми это — тебе пригодится."
+    };
+    npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, phrases2));
 
     startMenu = new StartMenu(renderer, font, window);
     
-
-
     for (Enemy* enemy : enemies) {
         enemy->setCollisionRects(tileMap->getCollisionRects());
     }
 
     // Передаем врагов игроку
     player->setEnemies(enemies);
-
     player->setCollisions(tileMap->getCollisionRects());
     player->setPosition(tileMap->getSpawnPoint().x, tileMap->getSpawnPoint().y);
-
     SDL_FPoint spawn = tileMap->getSpawnPoint();
     float playerHeight = 64.0f;  // замени на реальную высоту спрайта игрока
-
     spawn.y -= playerHeight;     // сдвигаем точку спавна вниз, чтобы игрок стоял на земле
-
     player->setPosition(spawn.x, spawn.y);
 
 
@@ -151,9 +173,7 @@ SDL_AppResult Game::SDL_AppInit()
 
         enemy->setAggroState(distance < enemy->getAggroRadius());
 
-
     }
-
     return SDL_AppResult();
 }
 
@@ -194,6 +214,27 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
             menu->handleEvent(*event, resume, quit);
         if (resume) showMenu = false;
     }
+    if (event->type == SDL_EVENT_KEY_DOWN && event->key.key == SDLK_F) {
+        if (!teleportConfirmDialogOpen && lastPortalInRange) {
+            pendingTeleport = *lastPortalInRange;
+            teleportConfirmDialogOpen = true;
+        }
+
+    }
+
+    if (teleportConfirmDialogOpen) {
+        if (event->type == SDL_EVENT_KEY_DOWN) {
+            if (event->key.key == SDLK_Y || event->key.key == SDLK_N) {
+                startTeleport(pendingTeleport.targetMap, pendingTeleport.targetSpawn);
+                teleportConfirmDialogOpen = false;
+            }
+            else if (event->key.key == SDLK_N) {
+                teleportConfirmDialogOpen = false;
+            }
+        }
+        return SDL_APP_CONTINUE;
+    }
+
     else {
         player->obrabotkaklavish(event);
     }
@@ -225,6 +266,18 @@ SDL_AppResult Game::SDL_AppIterate()
     tileMap->renderLayer(renderer, camera, "Tile Layer 5");
     tileMap->renderLayer(renderer, camera, "Tile Layer 6");
     tileMap->renderLayer(renderer, camera, "Tile Layer 7");
+    tileMap->renderCollisions(renderer, camera);
+    
+    // Проверка попадания в ловушку
+    SDL_FRect playerRect = player->getDest();
+    for (const auto& trap : tileMap->getTraps()) {
+        if (SDL_HasRectIntersectionFloat(&playerRect, &trap)) {
+             player->takeDamage(player->getHealth()); // или player->die(), если есть
+            break;
+        }
+    }
+
+
     if (player->isDead()) {
         if (!gameOver) {
             gameOver = true;
@@ -389,9 +442,70 @@ SDL_AppResult Game::SDL_AppIterate()
                 SDL_DestroyTexture(texture);
             }
         }
+        if (isTeleporting) {
+            teleportTimer -= deltaTime;
+
+            if (!shouldLoadNextMap && teleportTimer <= 2.95f) {
+                shouldLoadNextMap = true;
+            }
+
+            if (shouldLoadNextMap) {
+                shouldLoadNextMap = false;
+                delete tileMap;
+                tileMap = new TileMap(renderer);
+                tileMap->loadFromFile("assets/map/" + teleportTargetMap);
+
+                player->setCollisions(tileMap->getCollisionRects());
+                SDL_FPoint spawn = tileMap->getGenericSpawnPointByName(teleportTargetSpawn);
+                spawn.y -= 64;
+                player->setPosition(spawn.x, spawn.y);
+
+                isTeleporting = false;
+            }
+        }
+
+
         player->renderInventory();
         renderFloatingTexts(renderer, font, camera);
     }
+    if (teleportConfirmDialogOpen) {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+        SDL_RenderFillRect(renderer, nullptr);
+
+
+        const char* msg = "Перейти в другую локацию?\n[Y] — Да    [N] — Нет";
+        SDL_Color white = { 255, 255, 255, 255 };   
+
+        SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, msg, strlen(msg), white, 600);
+
+
+        if (surf) {
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+            float w = 0, h = 0;
+            SDL_GetTextureSize(tex, &w, &h);
+            SDL_FRect dst = { 960 - w / 2.0f, 540 - h / 2.0f, w, h };
+            SDL_RenderTexture(renderer, tex, nullptr, &dst);
+            SDL_DestroySurface(surf);
+            SDL_DestroyTexture(tex);
+        }
+    }
+
+    if (isTeleporting) {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderFillRect(renderer, nullptr);
+
+        SDL_Color white = { 255, 255, 255, 255 };
+        SDL_Surface* surf = TTF_RenderText_Solid(font, "Loading...", strlen("Loading..."), white);
+        if (surf) {
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+            float w = 0, h = 0;
+            SDL_GetTextureSize(tex, &w, &h);
+            SDL_FRect dst = { 960 - w / 2.0f, 540 - h / 2.0f, w, h };
+            SDL_RenderTexture(renderer, tex, nullptr, &dst);
+            SDL_DestroySurface(surf);
+            SDL_DestroyTexture(tex);
+        }
+    }   
 
     SDL_RenderPresent(renderer);
     SDL_Delay(16);

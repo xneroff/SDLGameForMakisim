@@ -32,8 +32,19 @@ public:
     SDL_AppResult SDL_AppEvent(SDL_Event* event);
     SDL_AppResult SDL_AppIterate();
     void SDL_AppQuit(SDL_AppResult result);
-
+    TileMap* getTileMap() { return tileMap; }
+    bool& getTeleportDialogFlag() { return teleportConfirmDialogOpen; }
+    // ✅ вот так — МОЖНО присваивать
+    Portal& getPendingTeleport() { return pendingTeleport; }
+    const Portal* lastPortalInRange = nullptr;
 private:
+  
+
+    bool isTeleporting = false;
+    std::string teleportTargetMap = "";
+    std::string teleportTargetSpawn = "";
+    float teleportTimer = 0.0f;
+
 
     StartMenu* startMenu = nullptr;
 
@@ -43,6 +54,12 @@ private:
     bool startGame = false;
     bool quitGame = false;
     bool showStartMenu = true;  // Показывать стартовое меню (StartMenu)
+    bool shouldLoadNextMap = false;
+
+
+    bool teleportConfirmDialogOpen = false;
+    Portal pendingTeleport;
+    void startTeleport(const std::string& map, const std::string& spawn);
 
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;

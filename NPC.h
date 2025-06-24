@@ -8,7 +8,8 @@
 #include <vector>
 class NPC {
 public:
-    NPC(SDL_Renderer* renderer, float x, float y);
+    NPC(SDL_Renderer* renderer, float x, float y, const std::vector<std::string>& phrases);
+
     ~NPC();
 
     void update(float deltaTime);
@@ -18,12 +19,7 @@ public:
     bool isNearPlayer(const SDL_FRect& playerRect) const;
     bool showDialog = false;
     std::string dialogText = "Привет, путник!";
-    std::vector<std::string> dialogPhrases = {
-    "Privet, putnik!",
-    "be safe in thats places.",
-    "",
-    "Have a good luck!"
-    };
+    std::vector<std::string> dialogPhrases;
     int currentPhrase = 0;
 
 private:

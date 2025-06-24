@@ -12,11 +12,13 @@
 #include "SkillHUD.h"
 #include "Inventory.h"
 
+
+class Game;
 class Enemy;
 
 class Player {
 public:
-    Player(SDL_Renderer* renderer, TTF_Font* font, Camera* camera);
+    Player(SDL_Renderer* renderer, TTF_Font* font, Camera* camera, Game* game);
     ~Player();
 
     void setEnemies(const std::vector<Enemy*>& enemiesList);
@@ -67,7 +69,7 @@ public:
     Inventory* getInventory() const { return inventory; }
 
 private:
-
+    Game* game = nullptr;
     // В private секции
     Uint64 lastDamageTime = 0;
     Uint64 lastHealTick = 0;
@@ -95,7 +97,7 @@ private:
     Interface* interface;
     Camera* camera;
 
-    float mapWidth = 50000.0f;
+    float mapWidth = 11200;
 
     SkillHUD* skillHUD;
 

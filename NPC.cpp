@@ -7,10 +7,13 @@
 
 
 
-NPC::NPC(SDL_Renderer * renderer, float x, float y) : renderer(renderer) {
+NPC::NPC(SDL_Renderer* renderer, float x, float y, const std::vector<std::string>& phrases)
+    : renderer(renderer), dialogPhrases(phrases)
+{
     dest = { x, y, 64, 64 };
     src = { 0, 0, 48, 48 };
     initAnimations();
+    dialogText = phrases.empty() ? "" : phrases[0];
 }
 
 NPC::~NPC() {}
