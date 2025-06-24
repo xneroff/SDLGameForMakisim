@@ -318,10 +318,15 @@ SDL_AppResult Game::SDL_AppIterate()
     else {
         const bool* keys = SDL_GetKeyboardState(nullptr);
         camera->update(player->getDest(), tileMap->getMapWidth(), tileMap->getMapHeight(), tileMap->getTileWidth(), tileMap->getTileHeight());
+        const float minZoom = 1.5f;
+        const float maxZoom = 3.5f;
+
         if (keys[SDL_SCANCODE_EQUALS]) camera->zoom += 0.01f;
         if (keys[SDL_SCANCODE_MINUS]) camera->zoom -= 0.01f;
-        if (camera->zoom < 0.5f) camera->zoom = 0.5f;
-        if (camera->zoom > 4.0f) camera->zoom = 4.0f;
+
+        if (camera->zoom < minZoom) camera->zoom = minZoom;
+        if (camera->zoom > maxZoom) camera->zoom = maxZoom;
+
 
         player->otrisovka();
         player->obnovleniepersa();

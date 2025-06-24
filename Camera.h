@@ -12,7 +12,8 @@ public:
     SDL_FRect getView() const { return camera; }
     SDL_FRect apply(const SDL_FRect& worldRect) const;
 
-    float zoom = 2.0f;
+    float zoom = 3.0f;
+
 
 private:
     SDL_FRect camera;

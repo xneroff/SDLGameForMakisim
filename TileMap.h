@@ -61,7 +61,8 @@ private:
     SDL_FPoint spawnPoint{ 0, 0 };
     std::map<std::string, SDL_FPoint> npcSpawnPoints;
     void loadPortals(const nlohmann::json& mapJson);
-    
+    std::unordered_map<int, const Tileset*> tileToTileset;
+
     std::vector<Chest> chests;
     SDL_Renderer* renderer;
     std::vector<Tileset> tilesets;

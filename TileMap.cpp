@@ -155,6 +155,7 @@ void TileMap::loadTilesets(const std::string& folder, const json& tilesetsJson) 
         }
 
         tilesets.push_back(ts);
+
     }
 }
 
