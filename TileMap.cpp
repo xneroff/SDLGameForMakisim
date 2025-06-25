@@ -303,13 +303,13 @@ void TileMap::renderCollisions(SDL_Renderer* renderer, Camera* camera) {
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // Красные — обычные коллизии
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 100);
-    for (const auto& r : collisionRects) {
-        SDL_FRect view = camera->apply(r); // с учётом зума
-        SDL_RenderFillRect(renderer, &view);
+    //SDL_SetRenderDrawColor(renderer, 255, 0, 0, 100);
+    //for (const auto& r : collisionRects) {
+    //    SDL_FRect view = camera->apply(r); // с учётом зума
+    //    SDL_RenderFillRect(renderer, &view);
 
-        SDL_RenderFillRect(renderer, &view);
-    }
+    //    SDL_RenderFillRect(renderer, &view);
+    //}
 
     // Жёлтые — ловушки, если они отдельно есть
     SDL_SetRenderDrawColor(renderer, 255, 255, 0, 100);

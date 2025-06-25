@@ -76,8 +76,6 @@ void NPC::render(SDL_Renderer* renderer, Camera* camera) {
 
 }
 
-
-
 SDL_FRect NPC::getRect() const {
     return dest;
 }

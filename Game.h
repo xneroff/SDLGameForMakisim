@@ -14,7 +14,6 @@ struct FloatingText {
     SDL_FPoint position;
     Uint64 startTime;    
     Uint32 duration;    
-
     FloatingText(const std::string& t, SDL_FPoint pos, Uint64 start, Uint32 dur)
         : text(t), position(pos), startTime(start), duration(dur) {
     }
@@ -38,16 +37,11 @@ public:
     Portal& getPendingTeleport() { return pendingTeleport; }
     const Portal* lastPortalInRange = nullptr;
 private:
-  
-
     bool isTeleporting = false;
     std::string teleportTargetMap = "";
     std::string teleportTargetSpawn = "";
     float teleportTimer = 0.0f;
-
-
     StartMenu* startMenu = nullptr;
-
     bool showMenu = false;
     bool quit = false;
     bool started = false; // Игра еще не начата — показываем главное меню
@@ -56,9 +50,6 @@ private:
     bool showStartMenu = true;  // Показывать стартовое меню (StartMenu)
     bool shouldLoadNextMap = false;
     SDL_Texture* dialogBoxTexture = nullptr;
-
-
-
     bool teleportConfirmDialogOpen = false;
     Portal pendingTeleport;
     void startTeleport(const std::string& map, const std::string& spawn);
@@ -74,8 +65,6 @@ private:
     TileMap* tileMap = nullptr;
     bool gameOver = false;
     Uint64 deathTime = 0;
-
     std::vector<Enemy*> enemies;  // вместо одного dummy — вектор врагов
-
     SDL_FRect getWindowSize();
 };

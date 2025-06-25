@@ -26,16 +26,12 @@ private:
     SDL_FRect inventoryRect;
     SDL_FRect draggingItemOriginalRect;
     SDL_Texture* slotHighlight = nullptr;
-
     AnimationSet previewAnim;
     Animation previewHandler;
     SDL_FRect previewRect;
-
     std::vector<SDL_FRect> slots;
     std::vector<Item> items;
-
     Item* draggingItem = nullptr;
     SDL_FPoint dragOffset;
-
     SDL_Texture* loadTexture(const std::string& path);
 };

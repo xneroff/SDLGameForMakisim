@@ -155,7 +155,6 @@
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerHealthHUD.cpp" />
-    <ClCompile Include="PlayerMoneyHUD.cpp" />
     <ClCompile Include="Skill.cpp" />
     <ClCompile Include="SkillHUD.cpp" />
     <ClCompile Include="StartMenu.cpp" />
@@ -177,7 +176,6 @@
     <ClInclude Include="NPC.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerHealthHUD.h" />
-    <ClInclude Include="PlayerMoneyHUD.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Skill.h" />
     <ClInclude Include="SkillHUD.h" />

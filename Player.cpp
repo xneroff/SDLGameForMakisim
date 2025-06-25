@@ -34,17 +34,6 @@ Player::Player(SDL_Renderer* renderer, TTF_Font* font, Camera* camera, Game* gam
     inventory->addItem("Topor", "assets/MoiInventory/Topor.png");
     inventory->addItem("eda", "assets/MoiInventory/eda.png");
 
-    dashIconTexture = IMG_LoadTexture(renderer, "assets/icons/dash.png");
-    if (dashIconTexture) {
-        skillHUD->addSkillIcon(dashIconTexture, "Dash");
-        skills.push_back(new DashSkill());
-    }
-
-    SDL_Texture* fireIcon = IMG_LoadTexture(renderer, "assets/icons/fireball.png");
-    if (fireIcon) {
-        skillHUD->addSkillIcon(fireIcon, "Fireball");
-        skills.push_back(new FireballSkill());
-    }
 }
 
 Player::~Player() {
@@ -161,7 +150,6 @@ SDL_FRect Player::getRect() const {
 
 void Player::addMoney(int addedMoney) {
     money += addedMoney;
-    interface->setMoney(money);
 }
 
 void Player::updateHitbox() {

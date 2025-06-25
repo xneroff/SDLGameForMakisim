@@ -23,21 +23,17 @@ public:
 
 private:
     void initAnimations();
-
     std::string name;
-
     SDL_Renderer* renderer;
     SDL_FRect dest;
     SDL_FRect src;
     SDL_FlipMode flip;
     TTF_Font* font = nullptr;
-
     std::map<std::string, AnimationSet> animations;
     std::string currentAnim = "idle";
     int currentFrame = 0;
     int frameTimer = 0;
     Animation animationHandler;
-
     float walkTimer = 0;
     float direction = 1;
     float speed = 1.0f;

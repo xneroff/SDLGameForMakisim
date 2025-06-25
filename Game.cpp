@@ -102,11 +102,11 @@ SDL_AppResult Game::SDL_AppInit()
     SDL_CreateWindowAndRenderer("SDL3 Game", 1920, 1080, SDL_WINDOW_RESIZABLE, &window, &renderer);
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
-    font = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 18);
-    dialogFont = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 16);
-    dialogNameFont = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 18);
+    font = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
+    dialogFont = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 20);
+    dialogNameFont = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
   
-    dialogBoxTexture = IMG_LoadTexture(renderer, "assets/NPC/dialogue2.png");
+    dialogBoxTexture = IMG_LoadTexture(renderer, "assets/NPC/dialogue.png");
     SDL_SetTextureScaleMode(dialogBoxTexture, SDL_SCALEMODE_NEAREST);
     camera = new Camera(1920.0f, 1080.0f);
 
@@ -144,7 +144,7 @@ SDL_AppResult Game::SDL_AppInit()
         "U need be safe in this place",
         "ff"
     };
-    npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, "Старейшина", phrases1));
+    npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, "Lucy", phrases1));
 
     SDL_FPoint pos2 = tileMap->getNPCSpawn("NPCSpawn2");
     std::vector<std::string> phrases2 = {
@@ -152,7 +152,7 @@ SDL_AppResult Game::SDL_AppInit()
         "Ты храбр, раз пришёл сюда.",
         "Возьми это — тебе пригодится."
     };
-    npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Рыцарь", phrases2));
+    npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Archon", phrases2));
 
     startMenu = new StartMenu(renderer, font, window);
     
@@ -422,9 +422,9 @@ SDL_AppResult Game::SDL_AppIterate()
                 }
 
                 // 💬 Текст диалога
-                SDL_Color white = { 255, 255, 255, 255 };
+                SDL_Color black = { 0, 0, 0, 255 };
           
-                SDL_Surface* textSurf = TTF_RenderText_Blended(dialogFont, phrase.c_str(), phrase.length(), white);
+                SDL_Surface* textSurf = TTF_RenderText_Blended(dialogFont, phrase.c_str(), phrase.length(), black);
 
                 if (textSurf) {
                     SDL_Texture* textTex = SDL_CreateTextureFromSurface(renderer, textSurf);
@@ -519,7 +519,7 @@ SDL_AppResult Game::SDL_AppIterate()
         SDL_RenderFillRect(renderer, nullptr);
 
 
-        const char* msg = "Перейти в другую локацию?\n[Y] — Да    [N] — Нет";
+        const char* msg = "Are u sure for teleporting to next map?\n[Y] — Yes    [N] — No";
         SDL_Color white = { 255, 255, 255, 255 };   
 
         SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, msg, strlen(msg), white, 600);
@@ -552,7 +552,7 @@ SDL_AppResult Game::SDL_AppIterate()
             SDL_DestroySurface(surf);
             SDL_DestroyTexture(tex);
 
-        }
+        }   
     }   
 
     SDL_RenderPresent(renderer);
