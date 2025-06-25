@@ -16,7 +16,7 @@ void Game::startTeleport(const std::string& map, const std::string& spawn) {
     isTeleporting = true;
     shouldLoadNextMap = false;
     teleportTimer = 3.0f;
-
+            
     teleportTargetMap = map;
     teleportTargetSpawn = spawn;
 }
@@ -75,6 +75,8 @@ Game::~Game()
         TTF_CloseFont(font);
         font = nullptr;
     }
+    if (dialogFont) TTF_CloseFont(dialogFont);
+    if (dialogNameFont) TTF_CloseFont(dialogNameFont);
 
     // Уничтожение окна и рендерера
     if (renderer) {
@@ -100,7 +102,12 @@ SDL_AppResult Game::SDL_AppInit()
     SDL_CreateWindowAndRenderer("SDL3 Game", 1920, 1080, SDL_WINDOW_RESIZABLE, &window, &renderer);
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
 
-    font = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
+    font = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 18);
+    dialogFont = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 16);
+    dialogNameFont = TTF_OpenFont("assets/fonts/Roboto-VariableFont_wdth,wght.ttf", 18);
+  
+    dialogBoxTexture = IMG_LoadTexture(renderer, "assets/NPC/dialogue2.png");
+    SDL_SetTextureScaleMode(dialogBoxTexture, SDL_SCALEMODE_NEAREST);
     camera = new Camera(1920.0f, 1080.0f);
 
 
@@ -133,12 +140,11 @@ SDL_AppResult Game::SDL_AppInit()
 
     SDL_FPoint pos1 = tileMap->getNPCSpawn("NPCSpawn1");
     std::vector<std::string> phrases1 = {
-        "Привет, герой!",
-        "Береги себя в этих землях.",
-        "Я когда-то был искателем приключений...",
-        "Удачи!"
+        "Hello, Olver!"
+        "U need be safe in this place",
+        "ff"
     };
-    npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, phrases1));
+    npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, "Старейшина", phrases1));
 
     SDL_FPoint pos2 = tileMap->getNPCSpawn("NPCSpawn2");
     std::vector<std::string> phrases2 = {
@@ -146,7 +152,7 @@ SDL_AppResult Game::SDL_AppInit()
         "Ты храбр, раз пришёл сюда.",
         "Возьми это — тебе пригодится."
     };
-    npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, phrases2));
+    npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Рыцарь", phrases2));
 
     startMenu = new StartMenu(renderer, font, window);
     
@@ -223,17 +229,18 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
     }
 
     if (teleportConfirmDialogOpen) {
-        if (event->type == SDL_EVENT_KEY_DOWN) {
-            if (event->key.key == SDLK_Y || event->key.key == SDLK_N) {
-                startTeleport(pendingTeleport.targetMap, pendingTeleport.targetSpawn);
-                teleportConfirmDialogOpen = false;
-            }
-            else if (event->key.key == SDLK_N) {
-                teleportConfirmDialogOpen = false;
-            }
+    if (event->type == SDL_EVENT_KEY_DOWN) {
+        if (event->key.key == SDLK_Y) {
+            startTeleport(pendingTeleport.targetMap, pendingTeleport.targetSpawn);
+            teleportConfirmDialogOpen = false;
         }
-        return SDL_APP_CONTINUE;
+        else if (event->key.key == SDLK_N) {
+            teleportConfirmDialogOpen = false; // Просто закроем окно, не телепортируемся
+        }
     }
+    return SDL_APP_CONTINUE;
+}
+
 
     else {
         player->obrabotkaklavish(event);
@@ -383,23 +390,57 @@ SDL_AppResult Game::SDL_AppIterate()
             npc->render(renderer, camera);
 
             if (npc->showDialog) {
-                SDL_FRect dialogBox = { npc->getRect().x - 20, npc->getRect().y - 25, 200, 40 };
-                SDL_FRect screenBox = camera->apply(dialogBox);
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
-                SDL_RenderFillRect(renderer, &screenBox);
+                std::string phrase = npc->dialogPhrases[npc->currentPhrase];
+                std::string name = npc->getName();  // Предполагается, что у NPC есть метод getName()
 
-                SDL_Color color = { 255, 255, 255, 255 };
-                std::string text = npc->dialogPhrases[npc->currentPhrase];
-                TTF_Font* fontt = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 14);
-                SDL_Surface* surface = TTF_RenderText_Solid(fontt, text.c_str(), text.length(), color);
-                if (surface) {
-                    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-                    SDL_FRect textRect = { screenBox.x + 10, screenBox.y + 10, (float)surface->w, (float)surface->h };
-                    SDL_DestroySurface(surface);
-                    SDL_RenderTexture(renderer, texture, nullptr, &textRect);
-                    SDL_DestroyTexture(texture);
+                // Размер окна и позиция (центр внизу экрана)
+                float dialogW = 900;
+                float dialogH = 200;
+                float centerX = (1920.0f - dialogW) / 2.0f;
+                float bottomY = 1080.0f - dialogH - 35;
+
+                SDL_FRect dialogRect = { centerX, bottomY, dialogW, dialogH };
+
+                // Отрисовка текстуры окна
+                SDL_RenderTexture(renderer, dialogBoxTexture, nullptr, &dialogRect);
+
+                // 🏷️ Имя NPC
+           
+                SDL_Color nameColor = { 255, 223, 100, 255 };
+                SDL_Surface* nameSurf = TTF_RenderText_Blended(dialogNameFont, name.c_str(), name.length(), nameColor);
+                if (nameSurf) {
+                    SDL_Texture* nameTex = SDL_CreateTextureFromSurface(renderer, nameSurf);
+                    SDL_FRect nameRect = {
+                        dialogRect.x + 165,
+                        dialogRect.y + 25,
+                        (float)nameSurf->w,
+                        (float)nameSurf->h
+                    };
+                    SDL_DestroySurface(nameSurf);
+                    SDL_RenderTexture(renderer, nameTex, nullptr, &nameRect);
+                    SDL_DestroyTexture(nameTex);
+                }
+
+                // 💬 Текст диалога
+                SDL_Color white = { 255, 255, 255, 255 };
+          
+                SDL_Surface* textSurf = TTF_RenderText_Blended(dialogFont, phrase.c_str(), phrase.length(), white);
+
+                if (textSurf) {
+                    SDL_Texture* textTex = SDL_CreateTextureFromSurface(renderer, textSurf);
+                    SDL_FRect textRect = {
+                        dialogRect.x + 60,
+                        dialogRect.y + 70,  // текст ниже имени
+                        (float)textSurf->w,
+                        (float)textSurf->h
+                    };
+                    SDL_DestroySurface(textSurf);
+                    SDL_RenderTexture(renderer, textTex, nullptr, &textRect);
+                    SDL_DestroyTexture(textTex);
                 }
             }
+
+
         }
 
         if (player->getIsAttack() && player->getCurrentAttackFrame() == 5) {
@@ -427,7 +468,7 @@ SDL_AppResult Game::SDL_AppIterate()
         for (const auto& label : tileMap->getLabels()) {
             SDL_FRect screenBox = camera->apply(label.rect);
             SDL_Color color = { 255, 255, 255, 255 };
-            SDL_Surface* surface = TTF_RenderText_Solid(font, label.text.c_str(), label.text.length(), color);
+            SDL_Surface* surface = TTF_RenderText_Solid(font, label.text.c_str(),0, color);
 
 
             if (surface) {
@@ -507,8 +548,10 @@ SDL_AppResult Game::SDL_AppIterate()
             SDL_GetTextureSize(tex, &w, &h);
             SDL_FRect dst = { 960 - w / 2.0f, 540 - h / 2.0f, w, h };
             SDL_RenderTexture(renderer, tex, nullptr, &dst);
+            
             SDL_DestroySurface(surf);
             SDL_DestroyTexture(tex);
+
         }
     }   
 
@@ -516,9 +559,6 @@ SDL_AppResult Game::SDL_AppIterate()
     SDL_Delay(16);
     return quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 }
-
-
-
 
 void Game::SDL_AppQuit(SDL_AppResult result)
 {

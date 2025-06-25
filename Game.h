@@ -55,12 +55,15 @@ private:
     bool quitGame = false;
     bool showStartMenu = true;  // Показывать стартовое меню (StartMenu)
     bool shouldLoadNextMap = false;
+    SDL_Texture* dialogBoxTexture = nullptr;
+
 
 
     bool teleportConfirmDialogOpen = false;
     Portal pendingTeleport;
     void startTeleport(const std::string& map, const std::string& spawn);
-
+    TTF_Font* dialogFont = nullptr;
+    TTF_Font* dialogNameFont = nullptr;
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
     Player* player = nullptr;

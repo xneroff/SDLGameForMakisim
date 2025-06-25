@@ -148,6 +148,7 @@ void TileMap::loadTilesets(const std::string& folder, const json& tilesetsJson) 
             32, 32, // tileWidth, tileHeight
             IMG_LoadTexture(renderer, fullImgPath.c_str())
         };
+        SDL_SetTextureScaleMode(ts.texture, SDL_SCALEMODE_NEAREST); // DIMAN KRASAVA +REPCHIK
 
         if (!ts.texture) {
             std::cerr << "Ошибка загрузки текстуры: " << fullImgPath << std::endl;

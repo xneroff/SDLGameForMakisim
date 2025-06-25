@@ -195,7 +195,7 @@ void Player::attackHandler() {
     if (!isAttack) return;
 
     int currentFrame = animationHandler.getCurrentFrame();
-    std::cout << "Enemies count in Player: " << enemies.size() << std::endl;
+
 
     if (currentFrame >= 4 && !hasDealtDamage) {
         SDL_FRect atkBox = getAttackHitbox();
@@ -418,11 +418,6 @@ void Player::setPosition(float x, float y) {
                         break;
                     }
                 }
-
-
-
-
-                std::cout << "Player position: x=" << dest.x << " y=" << dest.y << std::endl;
 
             }
 

@@ -8,14 +8,13 @@
 #include <vector>
 class NPC {
 public:
-    NPC(SDL_Renderer* renderer, float x, float y, const std::vector<std::string>& phrases);
-
+    NPC(SDL_Renderer* renderer, float x, float y, const std::string& name, const std::vector<std::string>& phrases);
     ~NPC();
 
     void update(float deltaTime);
     void render(SDL_Renderer* renderer, Camera* camera);
     SDL_FRect getRect() const;
-
+    std::string getName() const { return name; }
     bool isNearPlayer(const SDL_FRect& playerRect) const;
     bool showDialog = false;
     std::string dialogText = "Привет, путник!";
@@ -25,7 +24,7 @@ public:
 private:
     void initAnimations();
 
-
+    std::string name;
 
     SDL_Renderer* renderer;
     SDL_FRect dest;
