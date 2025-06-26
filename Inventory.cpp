@@ -1,12 +1,7 @@
 ﻿#include "Inventory.h"
 #include <iostream>
 
-Inventory::Inventory(SDL_Renderer* renderer)
-    : renderer(renderer)
-    , dragOffset{ 0.0f, 0.0f }  // Инициализируем смещение для drag&drop
-    , draggingItem(nullptr)
-    , previewAnim{ nullptr, 0, 0 }  // Инициализируем пустой аниматор
-    , draggingItemOriginalRect{ 0,0,0,0 }  // Инициализируем rect
+Inventory::Inventory(SDL_Renderer* renderer) : renderer(renderer), dragOffset{ 0.0f, 0.0f }, draggingItem(nullptr), previewAnim{ nullptr, 0, 0 } , draggingItemOriginalRect{ 0,0,0,0 }  // Инициализируем rect
 {
     background = IMG_LoadTexture(renderer, "assets/MoiInventory/Inventory_style_02d.png");
     SDL_SetTextureScaleMode(background, SDL_SCALEMODE_NEAREST);
@@ -121,9 +116,7 @@ void Inventory::render() {
         src.y = 0;
         src.w = 48;
         src.h = 48;
-
         previewHandler.update(previewAnim, src, 48);
-
         SDL_FRect dst;
         dst.x = previewRect.x;
         dst.y = previewRect.y - 30;
@@ -132,20 +125,15 @@ void Inventory::render() {
 
         SDL_RenderTexture(renderer, previewAnim.texture, &src, &dst);
     }
-
-
-
     // Предметы
     for (const auto& item : items) {
         if (&item == draggingItem) continue;
         SDL_RenderTexture(renderer, item.texture, nullptr, &item.rect);
     }
-
     if (draggingItem) {
         SDL_RenderTexture(renderer, draggingItem->texture, nullptr, &draggingItem->rect);
     }
 }
-
 void Inventory::handleEvent(SDL_Event* event) {
     float mx_int, my_int;
     SDL_GetMouseState(&mx_int, &my_int);
@@ -178,7 +166,6 @@ void Inventory::handleEvent(SDL_Event* event) {
                     closestSlot = &slot;
                 }
             }
-
             // Проверка: занят ли слот
             bool slotOccupied = false;
             if (closestSlot) {  // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА!
@@ -191,7 +178,6 @@ void Inventory::handleEvent(SDL_Event* event) {
                     }
                 }
             }
-
             if (closestSlot != nullptr) {
                 // Проверяем, чтобы не положить предмет в previewRect и чтобы слот не был занят
                 if (!(closestSlot->x == previewRect.x &&
@@ -211,11 +197,9 @@ void Inventory::handleEvent(SDL_Event* event) {
             else {
                 draggingItem->rect = draggingItemOriginalRect;
             }
-
             draggingItem = nullptr; // отпускаем предмет
         }
     }
-
     if (draggingItem) {
         // предмет следует за курсором
         draggingItem->rect.x = mx - draggingItem->rect.w / 2.0f;

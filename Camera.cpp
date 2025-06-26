@@ -15,7 +15,7 @@ void Camera::update(const SDL_FRect& player, float mapWidth, float mapHeight, in
     float targetX = player.x + player.w / 2 - camera.w / 2;
     float targetY = player.y + player.h / 2 - camera.h / 2;
 
-    float maxX = mapWidth * tileWidth - camera.w;
+    float maxX = mapWidth * tileWidth - camera.w;   
     float maxY = mapHeight * tileHeight - camera.h;
 
     camera.x += (targetX - camera.x) * smoothing;
