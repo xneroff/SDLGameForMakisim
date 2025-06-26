@@ -124,15 +124,7 @@ SDL_AppResult Game::SDL_AppInit()
     // Создаем врагов
  // Создаем врагов
     enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Default));
-    /*  enemies.push_back(new Enemy(renderer, 850.0f, 250.0f, EnemyType::Default));*/
-
-
-
-      // Game::SDL_AppInit()
-
-      //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Boar));
-      //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Fox));
-      //enemies.push_back(new Enemy(renderer, 1200.0f, 230.0f, EnemyType::Bird));
+ 
 
     float playerY = player->getDest().y;
     SDL_FPoint npc1Pos = tileMap->getNPCSpawn("NPCSpawn1");
@@ -140,17 +132,15 @@ SDL_AppResult Game::SDL_AppInit()
 
     SDL_FPoint pos1 = tileMap->getNPCSpawn("NPCSpawn1");
     std::vector<std::string> phrases1 = {
-        "Hello, Olver!"
-        "U need be safe in this place",
-        "ff"
+        "Hello, Olver!",
+        "you have to be careful in these places"
     };
     npcs.push_back(new NPC(renderer, pos1.x, pos1.y - 64, "Lucy", phrases1));
 
     SDL_FPoint pos2 = tileMap->getNPCSpawn("NPCSpawn2");
     std::vector<std::string> phrases2 = {
-        "Здесь обитает древнее зло.",
-        "Ты храбр, раз пришёл сюда.",
-        "Возьми это — тебе пригодится."
+        "This cave not for you",
+        "You should go back"
     };
     npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Archon", phrases2));
 
@@ -519,7 +509,7 @@ SDL_AppResult Game::SDL_AppIterate()
         SDL_RenderFillRect(renderer, nullptr);
 
 
-        const char* msg = "Are u sure for teleporting to next map?\n[Y] — Yes    [N] — No";
+        const char* msg = "Are u sure for teleporting to next map?\n\n[Y] - Yes    [N] - No";
         SDL_Color white = { 255, 255, 255, 255 };
 
         SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, msg, strlen(msg), white, 600);

@@ -185,7 +185,7 @@ void TileMap::loadCollisions(const json& layersJson) {
                     }
                 }
             }
-
+                
             else if (layerName == "NPCSpawns") {
                 for (const auto& obj : layer["objects"]) {
                     if (obj.contains("name")) {
