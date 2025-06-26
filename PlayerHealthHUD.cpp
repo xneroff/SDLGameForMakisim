@@ -25,8 +25,12 @@ PlayerHealthHUD::~PlayerHealthHUD() {
 
 void PlayerHealthHUD::setHealth(int newHealth) {
     Health = newHealth;
-    SDL_Log("setHealth called, newHealth = %d", newHealth);
+    DisplayedHealth = static_cast<float>(newHealth);  // 🔥 сбрасываем отображаемое значение
+    float percent = DisplayedHealth / TotalHealth;
+    destHealthBar.w = static_cast<int>(600 * percent);
+    updateText();
 }
+
 
 
 void PlayerHealthHUD::update(float deltaTime) {

@@ -136,6 +136,21 @@ void Enemy::render(SDL_Renderer* renderer, Camera* camera) {
 
     if (isDead)
         SDL_SetTextureAlphaMod(tex, 255);
+
+    if (isAttacking) {
+        SDL_FRect attackBox = getAttackHitbox();
+        SDL_FRect screenAttackBox = camera->apply(attackBox);
+
+        // Сохраняем текущий цвет рисования
+        Uint8 r, g, b, a;
+        SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a);
+
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 150);  // Красный цвет с прозрачностью
+        SDL_RenderRect(renderer, &screenAttackBox);
+
+        // Восстанавливаем цвет
+        SDL_SetRenderDrawColor(renderer, r, g, b, a);
+    }
 }
 
 void Enemy::update(float deltaTime, Player* player)
@@ -168,17 +183,28 @@ void Enemy::update(float deltaTime, Player* player)
 
     // --- атака ------------------------------------------------------------
     if (isAttacking) {
+        // Всегда смотрим на игрока, даже во время атаки
+        float dx = player->getRect().x - rect.x;
+        facingRight = dx >= 0;
+
         attackAnimTimer += deltaTime;
         if (!hasDealtDamageInThisAttack && currentFrame == 3) {
-            player->takeDamage(12 + rand() % 4);
-            hasDealtDamageInThisAttack = true;
+            SDL_FRect attackBox = getAttackHitbox();
+            SDL_FRect playerBox = player->getHitbox();
+
+            if (SDL_HasRectIntersectionFloat(&attackBox, &playerBox)) {
+                player->takeDamage(12 + rand() % 4);
+                hasDealtDamageInThisAttack = true;
+            }
         }
+
         if (attackAnimTimer >= attackAnimDuration) {
             isAttacking = false;
             setAnimation("idle");
         }
         return;
     }
+
 
 
 
@@ -216,16 +242,33 @@ void Enemy::update(float deltaTime, Player* player)
             setAnimation("attack");
             isAttacking = true;
             attackAnimTimer = 0.0f;
-            hasDealtDamageInThisAttack = false; // сбросить урон
+            hasDealtDamageInThisAttack = false;
             timeSinceLastAttack = 0.0f;
+
+            // 💡 Сохраняем текущую позицию игрока как фиксированный хитбокс
+            attackHitbox = player->getHitbox();
         }
+
 
 
         else {
-            setAnimation("walk");
-            rect.x += (dx / distance) * speed * deltaTime;
-            facingRight = dx >= 0;
+            // Расстояние между центрами по X
+            float enemyCenterX = rect.x + rect.w / 2.0f;
+            float playerCenterX = player->getRect().x + player->getRect().w / 2.0f;
+            float distanceX = fabsf(enemyCenterX - playerCenterX);
+
+            float desiredDistance = 25.0f; // минимальная дистанция
+
+            if (distanceX > desiredDistance) {
+                setAnimation("walk");
+                rect.x += (dx / distance) * speed * deltaTime;
+                facingRight = dx >= 0;
+            }
+            else {
+                setAnimation("idle");
+            }
         }
+
         if (distance > aggroRadius * 1.5f)
             state = EnemyState::Returning;
     }
@@ -267,4 +310,16 @@ void Enemy::update(float deltaTime, Player* player)
         animationTimer = 0.0f;
         currentFrame = (currentFrame + 1) % totalFrames;
     }
+}
+
+SDL_FRect Enemy::getAttackHitbox() const {
+    float width = rect.w * 0.8f;    // ширина хитбокса
+    float height = rect.h * 0.8f;   // высота хитбокса
+
+    float offsetX = rect.w * 0.6f;  // сдвиг хитбокса внутрь врага по X (30% ширины тела)
+
+    float x = facingRight ? rect.x + rect.w - offsetX : rect.x - width + offsetX;
+    float y = rect.y + rect.h * 0.2f; // чуть ниже верхней границы врага
+
+    return SDL_FRect{ x, y, width, height };
 }

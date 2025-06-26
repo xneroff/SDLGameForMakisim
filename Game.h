@@ -36,6 +36,8 @@ public:
     // ✅ вот так — МОЖНО присваивать
     Portal& getPendingTeleport() { return pendingTeleport; }
     const Portal* lastPortalInRange = nullptr;
+    void restartGame();
+
 private:
     bool isTeleporting = false;
     std::string teleportTargetMap = "";

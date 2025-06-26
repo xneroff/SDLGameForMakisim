@@ -13,10 +13,8 @@ TileMap::~TileMap() { for (auto& ts : tilesets) SDL_DestroyTexture(ts.texture); 
 bool TileMap::loadFromFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
-        std::cerr << "Ошибка загрузки карты: " << path << std::endl;
         return false;
     }
-    std::cout << "Файл карты загружен успешно: " << path << std::endl;
 
     json j;
     file >> j;

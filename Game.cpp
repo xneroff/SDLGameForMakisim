@@ -10,13 +10,13 @@
 #include <iostream>
 #include "NPC.h"
 #include "Player.h"
-
+#include "Interface.h"
 std::vector<NPC*> npcs;
 void Game::startTeleport(const std::string& map, const std::string& spawn) {
     isTeleporting = true;
     shouldLoadNextMap = false;
     teleportTimer = 3.0f;
-            
+
     teleportTargetMap = map;
     teleportTargetSpawn = spawn;
 }
@@ -105,7 +105,7 @@ SDL_AppResult Game::SDL_AppInit()
     font = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
     dialogFont = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 20);
     dialogNameFont = TTF_OpenFont("assets/fonts/PressStart2P-Regular.ttf", 18);
-  
+
     dialogBoxTexture = IMG_LoadTexture(renderer, "assets/NPC/dialogue.png");
     SDL_SetTextureScaleMode(dialogBoxTexture, SDL_SCALEMODE_NEAREST);
     camera = new Camera(1920.0f, 1080.0f);
@@ -124,15 +124,15 @@ SDL_AppResult Game::SDL_AppInit()
     // Создаем врагов
  // Создаем врагов
     enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Default));
-    enemies.push_back(new Enemy(renderer, 850.0f, 250.0f, EnemyType::Default));
-  
+    /*  enemies.push_back(new Enemy(renderer, 850.0f, 250.0f, EnemyType::Default));*/
 
 
-    // Game::SDL_AppInit()
 
-    //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Boar));
-    //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Fox));
-    //enemies.push_back(new Enemy(renderer, 1200.0f, 230.0f, EnemyType::Bird));
+      // Game::SDL_AppInit()
+
+      //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Boar));
+      //enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Fox));
+      //enemies.push_back(new Enemy(renderer, 1200.0f, 230.0f, EnemyType::Bird));
 
     float playerY = player->getDest().y;
     SDL_FPoint npc1Pos = tileMap->getNPCSpawn("NPCSpawn1");
@@ -155,7 +155,7 @@ SDL_AppResult Game::SDL_AppInit()
     npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Archon", phrases2));
 
     startMenu = new StartMenu(renderer, font, window);
-    
+
     for (Enemy* enemy : enemies) {
         enemy->setCollisionRects(tileMap->getCollisionRects());
     }
@@ -192,12 +192,12 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
         startMenu->handleEvent(*event, startGame, showSettings, quit);
         if (startGame) {
             showStartMenu = false;
-            // Запускаем игру
         }
         if (quit) {
-            // Завершаем приложение
+            return SDL_APP_SUCCESS;  // <<< вот это заставляет выйти
         }
     }
+
 
     if (event->type == SDL_EVENT_QUIT)
         return SDL_APP_SUCCESS;
@@ -229,17 +229,17 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
     }
 
     if (teleportConfirmDialogOpen) {
-    if (event->type == SDL_EVENT_KEY_DOWN) {
-        if (event->key.key == SDLK_Y) {
-            startTeleport(pendingTeleport.targetMap, pendingTeleport.targetSpawn);
-            teleportConfirmDialogOpen = false;
+        if (event->type == SDL_EVENT_KEY_DOWN) {
+            if (event->key.key == SDLK_Y) {
+                startTeleport(pendingTeleport.targetMap, pendingTeleport.targetSpawn);
+                teleportConfirmDialogOpen = false;
+            }
+            else if (event->key.key == SDLK_N) {
+                teleportConfirmDialogOpen = false; // Просто закроем окно, не телепортируемся
+            }
         }
-        else if (event->key.key == SDLK_N) {
-            teleportConfirmDialogOpen = false; // Просто закроем окно, не телепортируемся
-        }
+        return SDL_APP_CONTINUE;
     }
-    return SDL_APP_CONTINUE;
-}
 
 
     else {
@@ -274,12 +274,12 @@ SDL_AppResult Game::SDL_AppIterate()
     tileMap->renderLayer(renderer, camera, "Tile Layer 6");
     tileMap->renderLayer(renderer, camera, "Tile Layer 7");
     tileMap->renderCollisions(renderer, camera);
-    
+
     // Проверка попадания в ловушку
     SDL_FRect playerRect = player->getDest();
     for (const auto& trap : tileMap->getTraps()) {
         if (SDL_HasRectIntersectionFloat(&playerRect, &trap)) {
-             player->takeDamage(player->getHealth()); // или player->die(), если есть
+            player->takeDamage(player->getHealth()); // или player->die(), если есть
             break;
         }
     }
@@ -293,30 +293,30 @@ SDL_AppResult Game::SDL_AppIterate()
 
         Uint32 elapsed = SDL_GetTicks() - deathTime;
 
+        // Показываем "Game Over"
         SDL_Color red = { 255, 0, 0, 255 };
-        SDL_Surface* surface = TTF_RenderText_Blended(font, "GAME OVER", strlen("GAME OVER"), red);
-        if (surface) {
-            SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-            SDL_DestroySurface(surface);
-
-            float w, h;
-            SDL_GetTextureSize(texture, &w, &h);
-            SDL_FRect dst = { 1920 / 2.0f - w / 2.0f, 1080 / 2.0f - h / 2.0f, w, h };
-            SDL_RenderTexture(renderer, texture, nullptr, &dst);
-            SDL_DestroyTexture(texture);
+        SDL_Surface* surf = TTF_RenderText_Blended(font, "GAME OVER", strlen("GAME OVER"), red);
+        if (surf) {
+            SDL_Texture* tex = SDL_CreateTextureFromSurface(renderer, surf);
+            float w = 0, h = 0;
+            SDL_GetTextureSize(tex, &w, &h);
+            SDL_FRect dst = { 960 - w / 2, 540 - h / 2, w, h };
+            SDL_RenderTexture(renderer, tex, nullptr, &dst);
+            SDL_DestroySurface(surf);
+            SDL_DestroyTexture(tex);
         }
 
         SDL_RenderPresent(renderer);
 
-        if (elapsed >= restartDelay) {
-            // Перезапускаем игру:
-            SDL_AppQuit(SDL_APP_SUCCESS);  // очистим старое состояние                // пересоздаём объект игры
-            SDL_AppInit();                 // запускаем заново
+        if (elapsed >= 3000) { // 3 секунды
+            restartGame();
+            return SDL_APP_CONTINUE;
         }
 
         SDL_Delay(16);
         return SDL_APP_CONTINUE;
     }
+
 
 
     if (showMenu) {
@@ -405,7 +405,7 @@ SDL_AppResult Game::SDL_AppIterate()
                 SDL_RenderTexture(renderer, dialogBoxTexture, nullptr, &dialogRect);
 
                 // 🏷️ Имя NPC
-           
+
                 SDL_Color nameColor = { 255, 223, 100, 255 };
                 SDL_Surface* nameSurf = TTF_RenderText_Blended(dialogNameFont, name.c_str(), name.length(), nameColor);
                 if (nameSurf) {
@@ -423,7 +423,7 @@ SDL_AppResult Game::SDL_AppIterate()
 
                 // 💬 Текст диалога
                 SDL_Color black = { 0, 0, 0, 255 };
-          
+
                 SDL_Surface* textSurf = TTF_RenderText_Blended(dialogFont, phrase.c_str(), phrase.length(), black);
 
                 if (textSurf) {
@@ -468,7 +468,7 @@ SDL_AppResult Game::SDL_AppIterate()
         for (const auto& label : tileMap->getLabels()) {
             SDL_FRect screenBox = camera->apply(label.rect);
             SDL_Color color = { 255, 255, 255, 255 };
-            SDL_Surface* surface = TTF_RenderText_Solid(font, label.text.c_str(),0, color);
+            SDL_Surface* surface = TTF_RenderText_Solid(font, label.text.c_str(), 0, color);
 
 
             if (surface) {
@@ -520,7 +520,7 @@ SDL_AppResult Game::SDL_AppIterate()
 
 
         const char* msg = "Are u sure for teleporting to next map?\n[Y] — Yes    [N] — No";
-        SDL_Color white = { 255, 255, 255, 255 };   
+        SDL_Color white = { 255, 255, 255, 255 };
 
         SDL_Surface* surf = TTF_RenderText_Blended_Wrapped(font, msg, strlen(msg), white, 600);
 
@@ -548,17 +548,47 @@ SDL_AppResult Game::SDL_AppIterate()
             SDL_GetTextureSize(tex, &w, &h);
             SDL_FRect dst = { 960 - w / 2.0f, 540 - h / 2.0f, w, h };
             SDL_RenderTexture(renderer, tex, nullptr, &dst);
-            
+
             SDL_DestroySurface(surf);
             SDL_DestroyTexture(tex);
 
-        }   
-    }   
+        }
+    }
 
     SDL_RenderPresent(renderer);
     SDL_Delay(16);
     return quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
 }
+
+void Game::restartGame() {
+    // Удаляем старую карту
+    delete tileMap;
+    tileMap = new TileMap(renderer);
+    tileMap->loadFromFile("assets/map/MEGATEST.json");
+
+    // Перезапускаем врагов
+    for (Enemy* enemy : enemies) delete enemy;
+    enemies.clear();
+    enemies.push_back(new Enemy(renderer, 800, 250, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 850, 250, EnemyType::Default));
+    for (Enemy* e : enemies)
+        e->setCollisionRects(tileMap->getCollisionRects());
+
+    // Сбрасываем игрока
+    SDL_FPoint spawn = tileMap->getSpawnPoint();
+    spawn.y -= 64;
+    player->setPosition(spawn.x, spawn.y);
+    player->revive();
+    player->getInterface()->setHealth(player->getHealth());
+
+    player->setEnemies(enemies);
+    player->setCollisions(tileMap->getCollisionRects());
+
+    // Сбрасываем флаг смерти
+    gameOver = false;
+}
+
+
 
 void Game::SDL_AppQuit(SDL_AppResult result)
 {

@@ -67,10 +67,14 @@ public:
 
     bool isInventoryOpen() const { return inventoryOpen; }
     Inventory* getInventory() const { return inventory; }
+    SDL_FRect getHitbox() const;
+    void revive() { currentHealth = TotalHealth; }
+    Interface* getInterface() const { return interface; }
+
 
 private:
     Game* game = nullptr;
-    // В private секции
+    // Â private ñåêöèè
     Uint64 lastDamageTime = 0;
     Uint64 lastHealTick = 0;
     bool canRegen = false;
@@ -134,7 +138,7 @@ private:
     bool isSkillActive = false;
 
     Uint64 lastDashTime = 0;
-    const Uint64 dashCooldown = 2000;
+    const Uint64 dashCooldown = 4000;
 
     Uint32 lastAttackTime = 0;
     const Uint32 attackCooldown = 300;

@@ -28,9 +28,12 @@ public:
     void setPosition(float x, float y);
     void setAggroState(bool state);
     bool isDeadNow() const { return isDead; }
+    SDL_FRect getAttackHitbox() const;
+
 
 private:
     void setAnimation(const std::string& anim);
+    float attackRange = 50.0f;  // Минимальное расстояние для атаки
 
     bool markedForDeletion = false;
 
@@ -67,6 +70,7 @@ private:
 
     int health;
     int maxHealth;
+    SDL_FRect attackHitbox; // фиксируется при начале атаки
 
     float attackCooldown = 1.0f;
     float timeSinceLastAttack = 0.0f;
