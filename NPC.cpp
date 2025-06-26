@@ -10,8 +10,6 @@
 NPC::NPC(SDL_Renderer* renderer, float x, float y, const std::string& name, const std::vector<std::string>& phrases)
     : name(name), dialogPhrases(phrases), renderer(renderer)  // ← добавь здесь
 {
-    std::cout << "Создан NPC: " << name << " по координатам " << x << ", " << y << std::endl;
-
     dest = { x, y, 64, 64 };
     src = { 0, 0, 48, 48 };
     initAnimations();
@@ -60,7 +58,9 @@ void NPC::update(float deltaTime) {
     }
 
     dest.x += direction * speed;
-    flip = direction < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+    if (direction < 0) flip = SDL_FLIP_HORIZONTAL;
+    else flip = SDL_FLIP_NONE;
+
     currentAnim = "walk";
 
     animationHandler.update(animations[currentAnim], src, (int)src.w);
@@ -70,9 +70,6 @@ void NPC::update(float deltaTime) {
 void NPC::render(SDL_Renderer* renderer, Camera* camera) {
     SDL_FRect screenDest = camera->apply(dest);
     SDL_RenderTextureRotated(renderer, animations[currentAnim].texture, &src, &screenDest, 0, nullptr, flip);
-    if (!animations[currentAnim].texture) {
-        std::cout << "❌ Текстура не загружена для NPC: " << name << std::endl;
-    }
 
 }
 

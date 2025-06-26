@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include <SDL3/SDL.h>
 #include <SDL3_ttf/SDL_ttf.h>
 #include <map>
@@ -70,7 +70,7 @@ public:
 
 private:
     Game* game = nullptr;
-    // В private секции
+    // Р’ private СЃРµРєС†РёРё
     Uint64 lastDamageTime = 0;
     Uint64 lastHealTick = 0;
     bool canRegen = false;

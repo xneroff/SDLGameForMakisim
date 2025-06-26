@@ -60,7 +60,7 @@ SDL_Texture* Inventory::loadTexture(const std::string& path) {
     if (!tex) std::cerr << " Не удалось загрузить: " << path << std::endl;
     else SDL_SetTextureScaleMode(tex, SDL_SCALEMODE_NEAREST);
     return tex;
-}
+}   
 
 void Inventory::addItem(const std::string& name, const std::string& path) {
     if (items.size() >= slots.size()) return;
@@ -81,9 +81,6 @@ void Inventory::render() {
     SDL_GetMouseState(&mx_int, &my_int);
     float mx = static_cast<float>(mx_int);
     float my = static_cast<float>(my_int);
-
-
-
 
     // Отрисовать выделение, если курсор над каким-то слотом
     for (const auto& slot : slots) {
@@ -167,7 +164,7 @@ void Inventory::handleEvent(SDL_Event* event) {
                 }
             }
             // Проверка: занят ли слот
-            bool slotOccupied = false;
+            bool slotOccupied = false;  
             if (closestSlot) {  // ОБЯЗАТЕЛЬНАЯ ПРОВЕРКА!
                 for (const auto& item : items) {
                     if (&item != draggingItem &&
