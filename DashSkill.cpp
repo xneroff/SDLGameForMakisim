@@ -1,4 +1,4 @@
-#include "DashSkill.h"
+п»ї#include "DashSkill.h"
 #include "Player.h"
 
 DashSkill::DashSkill()
@@ -29,12 +29,12 @@ void DashSkill::update(Player* player, float deltaTime) {
     SDL_FRect nextPos = dest;
     nextPos.x += dx;
 
-    // Проверяем коллизию с новым положением
+    // ГЏГ°Г®ГўГҐГ°ГїГҐГ¬ ГЄГ®Г«Г«ГЁГ§ГЁГѕ Г± Г­Г®ГўГ»Г¬ ГЇГ®Г«Г®Г¦ГҐГ­ГЁГҐГ¬
     if (!player->checkCollisionForRect(nextPos)) {
-        player->setDest(nextPos); // безопасное перемещение
+        player->setDest(nextPos); // ГЎГҐГ§Г®ГЇГ Г±Г­Г®ГҐ ГЇГҐГ°ГҐГ¬ГҐГ№ГҐГ­ГЁГҐ
     }
     else {
-        // При столкновении прерываем рывок
+        // ГЏГ°ГЁ Г±ГІГ®Г«ГЄГ­Г®ГўГҐГ­ГЁГЁ ГЇГ°ГҐГ°Г»ГўГ ГҐГ¬ Г°Г»ГўГ®ГЄ
         isDashing = false;
     }
 
@@ -42,5 +42,3 @@ void DashSkill::update(Player* player, float deltaTime) {
         isDashing = false;
     }
 }
-
-

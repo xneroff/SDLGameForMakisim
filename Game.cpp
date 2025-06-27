@@ -123,8 +123,21 @@ SDL_AppResult Game::SDL_AppInit()
 
     // Создаем врагов
  // Создаем врагов
-    enemies.push_back(new Enemy(renderer, 800.0f, 250.0f, EnemyType::Default));
- 
+    enemies.push_back(new Enemy(renderer, 1160.0f, 2848.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 1650.0f, 2784.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 2250.0f, 2976.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 2260.0f, 2976.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 2360.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 2930.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 3170.0f, 2753.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 3780.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 3510.0f, 2624.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 5080.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 4900.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 4950.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 5120.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 5690.0f, 2785.0f, EnemyType::Default));
+    enemies.push_back(new Enemy(renderer, 2602.0f, 2976.0f, EnemyType::GraveRobber));
 
     float playerY = player->getDest().y;
     SDL_FPoint npc1Pos = tileMap->getNPCSpawn("NPCSpawn1");
@@ -212,7 +225,20 @@ SDL_AppResult Game::SDL_AppEvent(SDL_Event* event)
             showMenu = true;
         }
     }
+    if (event->type == SDL_EVENT_KEY_DOWN)
+    {
+        if (event->key.key == SDLK_F1)
+        {
+            float spawnX = player->getDest().x + 50.0f;
+            float spawnY = player->getDest().y;
 
+            Enemy* newEnemy = new Enemy(renderer, spawnX, spawnY, EnemyType::Default);
+            newEnemy->setCollisionRects(tileMap->getCollisionRects());
+            enemies.push_back(newEnemy);
+
+            std::cout << "Spawned new enemy at (" << spawnX << ", " << spawnY << ")" << std::endl;
+        }
+    }
     if (showMenu) {
         bool resume = false;
         if (menu)

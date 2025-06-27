@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <SDL3/SDL.h>
 #include "Player.h"
 #include "Skill.h"
@@ -27,4 +27,8 @@ private:
 
     float traveledDistance;
     float maxDistance;
+
+    // ������ ��� ��� ���������� � private:
+    float cooldownTime;      // ����� �� � ��������
+    float timeSinceLastUse;  // ����� � ���������� �������������
 };

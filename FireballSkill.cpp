@@ -6,12 +6,17 @@ FireballSkill::FireballSkill()
     fireballSpeed(600.0f),
     fireballDirection(1.0f),
     traveledDistance(0.0f),
-    maxDistance(500.0f)
+    maxDistance(500.0f),
+    cooldownTime(4.0f),      // 4 секунды КД
+    timeSinceLastUse(4.0f)   // можно сразу разрешить использовать
 {
 }
 
+
 void FireballSkill::activate(Player* player) {
-    if (active) return;
+    // Если скилл активен или КД не прошёл — не активируем
+    if (active || timeSinceLastUse < cooldownTime)
+        return;
 
     SDL_FRect playerRect = player->getDest();
 
@@ -23,18 +28,23 @@ void FireballSkill::activate(Player* player) {
 
     traveledDistance = 0.0f;
     active = true;
+
+    timeSinceLastUse = 0.0f; // сбрасываем таймер КД при активации
 }
 
+
 void FireballSkill::update(Player* player, float deltaTime) {
+    // Обновляем таймер КД
+    if (timeSinceLastUse < cooldownTime)
+        timeSinceLastUse += deltaTime;
+
     if (!active) return;
 
     float dx = fireballSpeed * fireballDirection * deltaTime;
 
-    // Позиция после перемещения
     SDL_FRect nextPos = fireballRect;
     nextPos.x += dx;
 
-    // Проверка коллизии через player
     if (!player->checkCollisionForRect(nextPos)) {
         fireballRect = nextPos;
         traveledDistance += std::abs(dx);
@@ -44,10 +54,10 @@ void FireballSkill::update(Player* player, float deltaTime) {
         }
     }
     else {
-        // Если столкнулся — отключаем
         active = false;
     }
 }
+
 
 void FireballSkill::render(SDL_Renderer* renderer, Camera* camera) {
     if (!active) return;

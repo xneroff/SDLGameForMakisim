@@ -310,15 +310,7 @@ void TileMap::renderCollisions(SDL_Renderer* renderer, Camera* camera) {
     //}
 
     // Жёлтые — ловушки, если они отдельно есть
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 100);
-    for (const auto& r : traps) {
-        SDL_FRect view = {
-            r.x - camera->getView().x,
-            r.y - camera->getView().y,
-            r.w, r.h
-        };
-        SDL_RenderFillRect(renderer, &view);
-    }
+ 
 }
 void TileMap::loadPortals(const json& j) {
     for (const auto& layer : j["layers"]) {

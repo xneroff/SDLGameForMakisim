@@ -1,4 +1,5 @@
-﻿#include "Enemy.h"
+﻿// Enemy.cpp
+#include "Enemy.h"
 #include <iostream>
 #include <cmath>
 
@@ -24,12 +25,12 @@ Enemy::Enemy(SDL_Renderer* renderer, float x, float y, EnemyType type)
         };
 
     if (type == EnemyType::GraveRobber) {
-        loadTexture("idle", "assets/2 GraveRobber/GraveRobber_idle.png");
-        loadTexture("walk", "assets/2 GraveRobber/GraveRobber_walk.png");
-        loadTexture("attack1", "assets/2 GraveRobber/GraveRobber_attack1.png");
-        loadTexture("attack2", "assets/2 GraveRobber/GraveRobber_attack2.png");
-        loadTexture("death", "assets/2 GraveRobber/GraveRobber_death.png");
-        loadTexture("hurt", "assets/2 GraveRobber/GraveRobber_hurt.png");
+        loadTexture("idle", "assets/NPC/2 GraveRobber/GraveRobber_idle.png");
+        loadTexture("walk", "assets/NPC/2 GraveRobber/GraveRobber_walk.png");
+        loadTexture("attack1", "assets/NPC/2 GraveRobber/GraveRobber_attack1.png");
+        loadTexture("attack2", "assets/NPC/2 GraveRobber/GraveRobber_attack2.png");
+        loadTexture("death", "assets/NPC/2 GraveRobber/GraveRobber_death.png");
+        loadTexture("hurt", "assets/NPC/2 GraveRobber/GraveRobber_hurt.png");
 
         frameCounts["idle"] = 4;
         frameCounts["walk"] = 6;
