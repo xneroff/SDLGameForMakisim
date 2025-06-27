@@ -796,7 +796,7 @@
                      "fontfamily":"Unispace",
                      "halign":"center",
                      "pixelsize":17,
-                     "text":"\u0414\u043b\u044f \u043f\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043d\u0430\u0436\u043c\u0438\u0442\u0435 WASD",
+                     "text":"\u0414\u043b\u044f \u043f\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043d\u0430\u0436\u043c\u0438\u0442\u0435 AD",
                      "valign":"center",
                      "wrap":true
                     },
@@ -849,7 +849,7 @@
                  "y":2963.17
                 }, 
                 {
-                 "height":43.6666666666665,
+                 "height":43.6667,
                  "id":275,
                  "name":"",
                  "rotation":0,
@@ -865,9 +865,9 @@
                     },
                  "type":"",
                  "visible":true,
-                 "width":142.333333333333,
+                 "width":142.333,
                  "x":1993.5,
-                 "y":2769.83333333333
+                 "y":2769.83
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -880,38 +880,6 @@
          "id":21,
          "name":"TextTriggers",
          "objects":[
-                {
-                 "height":0,
-                 "id":154,
-                 "name":"",
-                 "properties":[
-                        {
-                         "name":"duration",
-                         "type":"int",
-                         "value":300
-                        }, 
-                        {
-                         "name":"fade",
-                         "type":"bool",
-                         "value":true
-                        }, 
-                        {
-                         "name":"once",
-                         "type":"bool",
-                         "value":true
-                        }, 
-                        {
-                         "name":"text",
-                         "type":"string",
-                         "value":"\u0414\u043b\u044f \u043f\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u043d\u0430\u0436\u043c\u0438\u0442\u0435 WASD"
-                        }],
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":0,
-                 "x":644.667,
-                 "y":3044
-                }, 
                 {
                  "height":0,
                  "id":155,
@@ -1030,7 +998,7 @@
                  "visible":true,
                  "width":580.872,
                  "x":157.03,
-                 "y":3040.6
+                 "y":3041.6
                 }, 
                 {
                  "height":144.667,
@@ -1077,7 +1045,7 @@
                  "y":2945.09
                 }, 
                 {
-                 "height":288.818,
+                 "height":128.818,
                  "id":104,
                  "name":"",
                  "rotation":0,
@@ -1088,7 +1056,7 @@
                  "y":2912.18
                 }, 
                 {
-                 "height":352.364,
+                 "height":196.364,
                  "id":105,
                  "name":"",
                  "rotation":0,
@@ -1483,7 +1451,7 @@
                  "type":"",
                  "visible":true,
                  "width":0,
-                 "x":6333.7,
+                 "x":6243.2,
                  "y":2846.55
                 }],
          "opacity":1,

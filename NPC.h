@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include <SDL3_ttf/SDL_ttf.h>
 #include <vector>
+
 class NPC {
 public:
     NPC(SDL_Renderer* renderer, float x, float y, const std::string& name, const std::vector<std::string>& phrases);
@@ -14,27 +15,30 @@ public:
     void update(float deltaTime);
     void render(SDL_Renderer* renderer, Camera* camera);
     SDL_FRect getRect() const;
-    std::string getName() const { return name; }
+    std::string getName() const;
+
     bool isNearPlayer(const SDL_FRect& playerRect) const;
-    bool showDialog = false;
-    std::string dialogText = "Привет, путник!";
+
+    bool showDialog;
+    std::string dialogText;
     std::vector<std::string> dialogPhrases;
-    int currentPhrase = 0;
+    int currentPhrase;
 
 private:
     void initAnimations();
+
     std::string name;
     SDL_Renderer* renderer;
     SDL_FRect dest;
     SDL_FRect src;
     SDL_FlipMode flip;
-    TTF_Font* font = nullptr;
+    TTF_Font* font;
     std::map<std::string, AnimationSet> animations;
-    std::string currentAnim = "idle";
-    int currentFrame = 0;
-    int frameTimer = 0;
+    std::string currentAnim;
+    int currentFrame;
+    int frameTimer;
     Animation animationHandler;
-    float walkTimer = 0;
-    float direction = 1;
-    float speed = 1.0f;
+    float walkTimer;
+    float direction;
+    float speed;
 };

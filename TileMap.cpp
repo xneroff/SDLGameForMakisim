@@ -161,7 +161,6 @@ void TileMap::loadTilesets(const std::string& folder, const json& tilesetsJson) 
 
 
 void TileMap::loadCollisions(const json& layersJson) {
-    std::cout << "Loading collisions and chests...\n";
 
     for (const auto& layer : layersJson) {
         std::string layerName = layer["name"];
@@ -232,7 +231,7 @@ void TileMap::loadCollisions(const json& layersJson) {
                 }
             }
             else if (layerName == "Nadpisi") {
-                for (const auto& obj : layer["objects"]) {
+                 for (const auto& obj : layer["objects"]) {
                     if (obj.contains("text")) {
                         MapLabel label;
                         label.rect = {
@@ -259,6 +258,7 @@ void TileMap::loadCollisions(const json& layersJson) {
                   // ← добавляем как твердые объекты
                     std::cout << "Trap collision added at: (" << trap.x << ", " << trap.y << ")\n";
                 }
+
             }
         }
     }

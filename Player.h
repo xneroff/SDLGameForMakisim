@@ -28,7 +28,7 @@ public:
     bool checkCollisionForRect(const SDL_FRect& rect) const;
     void setPosition(float x, float y);
     void setCollisions(const std::vector<SDL_FRect>& rects);
-
+    Interface* getInterface() const { return interface; }
     SDL_FRect getDest() const { return dest; }
 
     void addMoney(int addedMoney);
@@ -44,6 +44,7 @@ public:
 
     int getDirection() const { return isFlipped() ? -1 : 1; }
     int getCurrentAttackFrame() const { return animationHandler.getCurrentFrame(); }
+    void updateFlip(const bool* keys);
 
     void updateInventory();
     void renderInventory();
@@ -68,11 +69,13 @@ public:
     bool isInventoryOpen() const { return inventoryOpen; }
     Inventory* getInventory() const { return inventory; }
     SDL_FRect getHitbox() const;
+
     void revive() { currentHealth = TotalHealth; }
-    Interface* getInterface() const { return interface; }
-
-
 private:
+
+    int baseDamage = 10;      // Базовый урон (начальный минимум)
+    int killCount = 0;        // Количество убитых врагов
+
     Game* game = nullptr;
     // Â private ñåêöèè
     Uint64 lastDamageTime = 0;
@@ -91,10 +94,10 @@ private:
     std::vector<SDL_FRect> collisionRects;
 
     void updateHitbox();
-    void defineLook(const bool* keys);
     void attackHandler();
     void moveHandler(const bool* keys);
     void initAnimations();
+
 
     SDL_Renderer* renderer;
     TTF_Font* font;

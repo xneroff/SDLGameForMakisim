@@ -1,5 +1,4 @@
-﻿// Enemy.cpp
-#include "Enemy.h"
+﻿#include "Enemy.h"
 #include <iostream>
 #include <cmath>
 
@@ -24,11 +23,40 @@ Enemy::Enemy(SDL_Renderer* renderer, float x, float y, EnemyType type)
         textures[name] = tex;
         };
 
-    loadTexture("idle", "assets/1 Enemies/2/idle.png");
-    loadTexture("walk", "assets/1 Enemies/2/walk.png");
-    loadTexture("attack", "assets/1 Enemies/2/attack.png");
-    loadTexture("death", "assets/1 Enemies/2/death.png");
-    loadTexture("hurt", "assets/1 Enemies/2/hurt.png");
+    if (type == EnemyType::GraveRobber) {
+        loadTexture("idle", "assets/2 GraveRobber/GraveRobber_idle.png");
+        loadTexture("walk", "assets/2 GraveRobber/GraveRobber_walk.png");
+        loadTexture("attack1", "assets/2 GraveRobber/GraveRobber_attack1.png");
+        loadTexture("attack2", "assets/2 GraveRobber/GraveRobber_attack2.png");
+        loadTexture("death", "assets/2 GraveRobber/GraveRobber_death.png");
+        loadTexture("hurt", "assets/2 GraveRobber/GraveRobber_hurt.png");
+
+        frameCounts["idle"] = 4;
+        frameCounts["walk"] = 6;
+        frameCounts["attack1"] = 6;
+        frameCounts["attack2"] = 6;
+        frameCounts["death"] = 6;
+        frameCounts["hurt"] = 3;
+
+        health = maxHealth = 500;
+        speed = 40.0f;
+        rect.w = rect.h = 130; // размер побольше
+
+    }
+    else {
+        loadTexture("idle", "assets/1 Enemies/2/idle.png");
+        loadTexture("walk", "assets/1 Enemies/2/walk.png");
+        loadTexture("attack", "assets/1 Enemies/2/attack.png");
+        loadTexture("death", "assets/1 Enemies/2/death.png");
+        loadTexture("hurt", "assets/1 Enemies/2/hurt.png");
+
+        frameCounts["idle"] = 4;
+        frameCounts["walk"] = 6;
+        frameCounts["attack"] = 6;
+        frameCounts["death"] = 6;
+        frameCounts["hurt"] = 2;
+    }
+
 
     initRectSize();
     setAnimation("idle");
@@ -151,10 +179,36 @@ void Enemy::render(SDL_Renderer* renderer, Camera* camera) {
         // Восстанавливаем цвет
         SDL_SetRenderDrawColor(renderer, r, g, b, a);
     }
+
+    SDL_FRect screenHitbox = camera->apply(hitbox);
+    SDL_SetRenderDrawColor(renderer, 0, 255, 255, 150); // голубой с прозрачностью
+    SDL_RenderRect(renderer, &screenHitbox);
+
+
+
 }
+
+void Enemy::setGroundRects(const std::vector<SDL_FRect>& rects) {
+    groundRects = rects;
+}
+
+void Enemy::setObstacleRects(const std::vector<SDL_FRect>& rects) {
+    obstacleRects = rects;
+}
+
 
 void Enemy::update(float deltaTime, Player* player)
 {
+
+    float shrinkAmount = 35.0f;  // на сколько пикселей хотим сузить хитбокс по ширине
+    hitbox.x = rect.x + shrinkAmount / 2.0f;  // сдвигаем внутрь на половину shrinkAmount
+    hitbox.y = rect.y + 12;   // если хочешь, оставь подъем по Y как есть
+    hitbox.w = rect.w - shrinkAmount;  // уменьшаем ширину
+    hitbox.h = rect.h - 1;   // оставляем высоту как есть
+
+
+    bool wasOnGround = isOnGround;
+
     // ❶ Всегда двигаем кадры раньше любых return
     animationTimer += deltaTime;
     if (animationTimer >= 0.15f) {
@@ -206,6 +260,15 @@ void Enemy::update(float deltaTime, Player* player)
     }
 
 
+    int damage = 12 + rand() % 4;
+    float aggroRadius = 150.0f;
+
+    if (type == EnemyType::GraveRobber) {
+        damage = 88 + rand() % 2;
+        aggroRadius = 300.0f;
+    }
+
+
 
 
     timeSinceLastAttack += deltaTime;
@@ -214,6 +277,14 @@ void Enemy::update(float deltaTime, Player* player)
     float dy = player->getRect().y - rect.y;
     float distance = sqrtf(dx * dx + dy * dy);
 
+    float enemyCenterX = rect.x + rect.w / 2.0f;
+    float playerCenterX = player->getRect().x + player->getRect().w / 2.0f;
+    float distanceX = fabsf(enemyCenterX - playerCenterX);
+
+    float desiredDistance = 25.0f; // минимальная дистанция до игрока
+
+
+
     if (state == EnemyState::Aggro) {
         for (Enemy* other : Enemy::allEnemies) {
             if (other != this && !other->isDeadNow()) {
@@ -221,12 +292,97 @@ void Enemy::update(float deltaTime, Player* player)
                     other->state = EnemyState::Aggro;
             }
         }
+
+        if (distance < 50.0f && timeSinceLastAttack >= attackCooldown) {
+            if (type == EnemyType::GraveRobber) {
+                // можно чередовать атаки: attack1 и attack2
+                static bool useAltAttack = false;
+                setAnimation(useAltAttack ? "attack1" : "attack2");
+                useAltAttack = !useAltAttack;
+
+            }
+            else {
+                setAnimation("attack");
+            }
+
+            isAttacking = true;
+            attackAnimTimer = 0.0f;
+            hasDealtDamageInThisAttack = false;
+            timeSinceLastAttack = 0.0f;
+            attackHitbox = player->getHitbox();
+        }
+
+        else if (distanceX > desiredDistance) {
+            setAnimation("walk");
+            float moveX = 0.0f;
+            if (distance != 0.0f) {
+                moveX = (dx / distance) * speed * deltaTime;
+            }
+
+
+            // Проверка препятствий
+            SDL_FRect nextRect = rect;
+            nextRect.x += moveX;
+
+            bool obstacleAhead = false;
+            SDL_FRect obstacleRect;
+
+            for (const auto& wall : obstacleRects) {  // используй obstacleRects вместо collisionRects
+                if (SDL_HasRectIntersectionFloat(&nextRect, &wall)) {
+                    obstacleAhead = true;
+                    obstacleRect = wall;
+                    break;
+                }
+            }
+
+
+
+
+            if (obstacleAhead) {
+                float heightDiff = (obstacleRect.y - rect.y);
+
+
+                if (heightDiff > -maxJumpHeight && heightDiff < 0) {
+                    if (isOnGround) {
+                        velocityY = jumpVelocity;
+                        isOnGround = false;
+                    }
+                }
+                else {
+                    moveX = 0;
+                    setAnimation("idle");
+                }
+
+
+            }
+
+            rect.x += moveX;
+            facingRight = dx >= 0;
+        }
+        else {
+            setAnimation("idle");
+        }
+
+        if (distance > aggroRadius * 1.5f)
+            state = EnemyState::Returning;
     }
 
-    if (state == EnemyState::Idle && distance < aggroRadius) {
-        suspicionTimer += deltaTime;
-        state = (suspicionTimer > suspicionThreshold) ? EnemyState::Aggro : EnemyState::Suspicious;
+
+    else if (state == EnemyState::Idle) {
+        if (distance < aggroRadius) {
+            suspicionTimer += deltaTime;
+            if (suspicionTimer > suspicionThreshold) {
+                state = EnemyState::Aggro;
+            }
+            else {
+                state = EnemyState::Suspicious;
+            }
+        }
+        else {
+            suspicionTimer = 0; // сброс, если игрок далеко
+        }
     }
+
     else if (state == EnemyState::Suspicious) {
         if (distance < aggroRadius) {
             suspicionTimer += deltaTime;
@@ -237,61 +393,36 @@ void Enemy::update(float deltaTime, Player* player)
             state = EnemyState::Idle;
         }
     }
-    else if (state == EnemyState::Aggro) {
-        if (distance < 50.0f && timeSinceLastAttack >= attackCooldown) {
-            setAnimation("attack");
-            isAttacking = true;
-            attackAnimTimer = 0.0f;
-            hasDealtDamageInThisAttack = false;
-            timeSinceLastAttack = 0.0f;
 
-            // 💡 Сохраняем текущую позицию игрока как фиксированный хитбокс
-            attackHitbox = player->getHitbox();
-        }
-
-
-
-        else {
-            // Расстояние между центрами по X
-            float enemyCenterX = rect.x + rect.w / 2.0f;
-            float playerCenterX = player->getRect().x + player->getRect().w / 2.0f;
-            float distanceX = fabsf(enemyCenterX - playerCenterX);
-
-            float desiredDistance = 25.0f; // минимальная дистанция
-
-            if (distanceX > desiredDistance) {
-                setAnimation("walk");
-                rect.x += (dx / distance) * speed * deltaTime;
-                facingRight = dx >= 0;
-            }
-            else {
-                setAnimation("idle");
-            }
-        }
-
-        if (distance > aggroRadius * 1.5f)
-            state = EnemyState::Returning;
-    }
     else if (state == EnemyState::Returning) {
-        setAnimation("walk");
         float back = spawnPoint.x - rect.x;
+
         if (fabsf(back) > 5.0f) {
+            setAnimation("walk");
             rect.x += (back / fabsf(back)) * speed * deltaTime;
             facingRight = back >= 0;
         }
         else {
             rect.x = spawnPoint.x;
             state = EnemyState::Idle;
+            setAnimation("idle");
+            suspicionTimer = 0.0f; // сбрасываем таймер подозрения
         }
     }
+
 
     velocityY += gravity;
     rect.y += velocityY;
     isOnGround = false;
 
+    // создаём прямоугольник для ног (меньше и выше)
+    SDL_FRect feetRect = rect;
+    feetRect.y += rect.h - 8;  // только нижние 8 пикселей
+    feetRect.h = 8;
+
     for (const auto& wall : collisionRects) {
         SDL_FRect inter;
-        if (SDL_GetRectIntersectionFloat(&rect, &wall, &inter)) {
+        if (SDL_GetRectIntersectionFloat(&hitbox, &wall, &inter)) {
             if (velocityY > 0) {
                 rect.y = wall.y - rect.h;
                 velocityY = 0;
@@ -305,11 +436,7 @@ void Enemy::update(float deltaTime, Player* player)
         }
     }
 
-    animationTimer += deltaTime;
-    if (animationTimer >= 0.15f) {
-        animationTimer = 0.0f;
-        currentFrame = (currentFrame + 1) % totalFrames;
-    }
+
 }
 
 SDL_FRect Enemy::getAttackHitbox() const {

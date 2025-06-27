@@ -8,12 +8,28 @@
 
 
 NPC::NPC(SDL_Renderer* renderer, float x, float y, const std::string& name, const std::vector<std::string>& phrases)
-    : name(name), dialogPhrases(phrases), renderer(renderer)  // ← добавь здесь
+    : name(name),
+    renderer(renderer),
+    dialogPhrases(phrases),
+    dest{ x, y, 64, 64 },
+    src{ 0, 0, 48, 48 },
+    flip(SDL_FLIP_NONE),
+    font(nullptr),
+    currentAnim("idle"),
+    currentFrame(0),
+    frameTimer(0),
+    walkTimer(0),
+    direction(1),
+    speed(1.0f),
+    showDialog(false),
+    dialogText("Привет, путник!"),
+    currentPhrase(0)
 {
-    dest = { x, y, 64, 64 };
-    src = { 0, 0, 48, 48 };
     initAnimations();
-    dialogText = phrases.empty() ? "" : phrases[0];
+
+    if (!phrases.empty()) {
+        dialogText = phrases[0];
+    }
 }
 
 
@@ -49,7 +65,7 @@ void NPC::update(float deltaTime) {
         return;  // ⛔️ не двигаемся, не обновляем анимацию
     }
 
-    walkTimer += deltaTime;
+    walkTimer += deltaTime; 
 
     // Меняет направление каждые 3 секунды
     if (walkTimer > 3.0f) {
@@ -64,6 +80,9 @@ void NPC::update(float deltaTime) {
     currentAnim = "walk";
 
     animationHandler.update(animations[currentAnim], src, (int)src.w);
+}
+std::string NPC::getName() const {
+    return name;
 }
 
 

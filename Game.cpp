@@ -117,7 +117,7 @@ SDL_AppResult Game::SDL_AppInit()
 
     tileMap = new TileMap(renderer);
     tileMap->loadFromFile("assets/map/MEGATEST.json");
-
+    
 
     float groundY = tileMap->getSpawnPoint().y;
 
@@ -143,6 +143,15 @@ SDL_AppResult Game::SDL_AppInit()
         "You should go back"
     };
     npcs.push_back(new NPC(renderer, pos2.x, pos2.y - 64, "Archon", phrases2));
+
+    SDL_FPoint pos3 = tileMap->getNPCSpawn("NPCSpawn3");
+    std::vector<std::string> phrases3 = {
+        "Darkness so close..."
+    };
+    npcs.push_back(new NPC(renderer, pos3.x, pos3.y - 64, "Archon", phrases3));
+    std::cout << "[Spawn3] pos: " << pos3.x << ", " << pos3.y << std::endl;
+
+
 
     startMenu = new StartMenu(renderer, font, window);
 
@@ -269,7 +278,7 @@ SDL_AppResult Game::SDL_AppIterate()
     SDL_FRect playerRect = player->getDest();
     for (const auto& trap : tileMap->getTraps()) {
         if (SDL_HasRectIntersectionFloat(&playerRect, &trap)) {
-            player->takeDamage(player->getHealth()); // или player->die(), если есть
+            player->takeDamage(player->getHealth()); 
             break;
         }
     }
@@ -538,13 +547,10 @@ SDL_AppResult Game::SDL_AppIterate()
             SDL_GetTextureSize(tex, &w, &h);
             SDL_FRect dst = { 960 - w / 2.0f, 540 - h / 2.0f, w, h };
             SDL_RenderTexture(renderer, tex, nullptr, &dst);
-
             SDL_DestroySurface(surf);
             SDL_DestroyTexture(tex);
-
         }
     }
-
     SDL_RenderPresent(renderer);
     SDL_Delay(16);
     return quit ? SDL_APP_SUCCESS : SDL_APP_CONTINUE;
@@ -570,10 +576,8 @@ void Game::restartGame() {
     player->setPosition(spawn.x, spawn.y);
     player->revive();
     player->getInterface()->setHealth(player->getHealth());
-
     player->setEnemies(enemies);
     player->setCollisions(tileMap->getCollisionRects());
-
     // Сбрасываем флаг смерти
     gameOver = false;
 }
